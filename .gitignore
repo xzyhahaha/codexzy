@@ -1,0 +1,13 @@
+target/
+*.log
+
+.idea/
+*.iml
+
+.DS_Store
+Thumbs.db
+
+uploads/checkin/*
+uploads/memo/*
+!uploads/checkin/.gitkeep
+!uploads/memo/.gitkeep
