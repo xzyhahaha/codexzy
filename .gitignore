@@ -3,6 +3,7 @@ target/
 
 .idea/
 *.iml
+.claude/
 
 .DS_Store
 Thumbs.db
