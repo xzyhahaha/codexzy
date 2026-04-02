@@ -3,6 +3,7 @@ package com.codexzy.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.codexzy.dto.CalendarDayDTO;
 import com.codexzy.dto.CheckInFormDTO;
 import com.codexzy.dto.CheckInStatDTO;
 import com.codexzy.entity.CheckIn;
@@ -13,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +46,7 @@ public class CheckInServiceImpl implements CheckInService {
 
     @Override
     public IPage<CheckIn> getPage(Long userId, long current, long size) {
-        Page<CheckIn> page = new Page<CheckIn>(current, size);
+        Page<CheckIn> page = new Page<>(current, size);
         return checkInMapper.selectPage(page, new LambdaQueryWrapper<CheckIn>()
                 .eq(CheckIn::getUserId, userId)
                 .orderByDesc(CheckIn::getCheckDate)
@@ -71,12 +74,47 @@ public class CheckInServiceImpl implements CheckInService {
         checkInMapper.deleteById(checkInId);
     }
 
+    @Override
+    public List<CalendarDayDTO> getCalendar(Long userId, int year, int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDate start = yearMonth.atDay(1);
+        LocalDate end = yearMonth.atEndOfMonth();
+        List<CheckIn> checkIns = checkInMapper.selectList(new LambdaQueryWrapper<CheckIn>()
+                .eq(CheckIn::getUserId, userId)
+                .between(CheckIn::getCheckDate, start, end));
+
+        Set<LocalDate> checkedDates = new HashSet<>();
+        for (CheckIn checkIn : checkIns) {
+            checkedDates.add(checkIn.getCheckDate());
+        }
+
+        List<CalendarDayDTO> days = new ArrayList<>();
+        int firstWeekDay = start.getDayOfWeek().getValue();
+        for (int i = 1; i < firstWeekDay; i++) {
+            CalendarDayDTO empty = new CalendarDayDTO();
+            empty.setCurrentMonth(false);
+            days.add(empty);
+        }
+
+        LocalDate today = LocalDate.now();
+        for (int day = 1; day <= yearMonth.lengthOfMonth(); day++) {
+            LocalDate date = yearMonth.atDay(day);
+            CalendarDayDTO dto = new CalendarDayDTO();
+            dto.setDayOfMonth(day);
+            dto.setCurrentMonth(true);
+            dto.setCheckedIn(checkedDates.contains(date));
+            dto.setToday(today.equals(date));
+            days.add(dto);
+        }
+        return days;
+    }
+
     private long calculateCurrentStreak(List<CheckIn> checkIns) {
         if (checkIns.isEmpty()) {
             return 0;
         }
 
-        Set<LocalDate> dates = new HashSet<LocalDate>();
+        Set<LocalDate> dates = new HashSet<>();
         for (CheckIn checkIn : checkIns) {
             dates.add(checkIn.getCheckDate());
         }

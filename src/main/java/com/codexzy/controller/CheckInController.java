@@ -1,6 +1,7 @@
 package com.codexzy.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.codexzy.dto.CalendarDayDTO;
 import com.codexzy.dto.CheckInFormDTO;
 import com.codexzy.entity.CheckIn;
 import com.codexzy.entity.User;
@@ -18,6 +19,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.time.YearMonth;
+import java.util.List;
 
 @Controller
 public class CheckInController {
@@ -39,7 +43,20 @@ public class CheckInController {
     }
 
     @GetMapping("/checkin/calendar")
-    public String calendar() {
+    public String calendar(Authentication authentication,
+                           @RequestParam(required = false) Integer year,
+                           @RequestParam(required = false) Integer month,
+                           Model model) {
+        User currentUser = userService.getByUsername(authentication.getName());
+        YearMonth current = year == null || month == null ? YearMonth.now() : YearMonth.of(year, month);
+        List<CalendarDayDTO> days = checkInService.getCalendar(currentUser.getId(), current.getYear(), current.getMonthValue());
+
+        model.addAttribute("calendarDays", days);
+        model.addAttribute("currentYear", current.getYear());
+        model.addAttribute("currentMonth", current.getMonthValue());
+        model.addAttribute("currentLabel", current.getYear() + " 年 " + current.getMonthValue() + " 月");
+        model.addAttribute("prev", current.minusMonths(1));
+        model.addAttribute("next", current.plusMonths(1));
         return "checkin/calendar";
     }
 

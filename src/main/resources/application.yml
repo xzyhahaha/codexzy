@@ -5,7 +5,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/codexzy?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
-    password: root
+    password: 123456
   sql:
     init:
       mode: always
@@ -35,4 +35,4 @@ file:
   upload-dir: uploads
 
 server:
-  port: 8080
+  port: 8081

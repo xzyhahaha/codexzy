@@ -7,10 +7,91 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body class="app-body">
-<main class="placeholder-page">
-    <h1>备忘录管理</h1>
-    <p>模块入口已接通，下一步实现分类、上传、下载和预览。</p>
-    <a th:href="@{/}" class="primary-btn">返回首页</a>
+<header class="topbar">
+    <div>
+        <h1>备忘录管理</h1>
+        <p>按分类整理文件，支持上传、下载和删除</p>
+    </div>
+    <nav class="nav-actions">
+        <a th:href="@{/}">返回首页</a>
+    </nav>
+</header>
+
+<main class="page-grid">
+    <div class="alert success" th:if="${successMessage}" th:text="${successMessage}"></div>
+    <div class="alert error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+    <section class="panel">
+        <h2>新建分类</h2>
+        <form th:action="@{/memo/category}" th:object="${categoryForm}" method="post" class="form-grid">
+            <label>
+                <span>分类名称</span>
+                <input type="text" th:field="*{categoryName}" placeholder="例如：简历、证书、项目资料">
+                <small class="field-error" th:if="${#fields.hasErrors('categoryName')}" th:errors="*{categoryName}"></small>
+            </label>
+            <button type="submit" class="primary-btn">创建分类</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>上传文件</h2>
+        <div class="empty-state" th:if="${categories.isEmpty()}">
+            <p>请先创建分类，再上传文件。</p>
+        </div>
+        <form th:if="${!categories.isEmpty()}" th:action="@{/memo/upload}" th:object="${uploadForm}" method="post" enctype="multipart/form-data" class="form-grid">
+            <label>
+                <span>分类</span>
+                <select th:field="*{categoryId}">
+                    <option value="">请选择分类</option>
+                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.categoryName}"></option>
+                </select>
+                <small class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></small>
+            </label>
+            <label>
+                <span>文件</span>
+                <input type="file" th:field="*{file}">
+            </label>
+            <label>
+                <span>备注</span>
+                <textarea th:field="*{remark}" rows="4" placeholder="可选，记录文件说明"></textarea>
+                <small class="field-error" th:if="${#fields.hasErrors('remark')}" th:errors="*{remark}"></small>
+            </label>
+            <button type="submit" class="primary-btn">上传文件</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>文件列表</h2>
+        <div class="empty-state" th:if="${categories.isEmpty()}">
+            <p>当前还没有分类。</p>
+        </div>
+        <div class="category-block" th:each="category : ${categories}">
+            <div class="category-header">
+                <h3 th:text="${category.categoryName}">分类</h3>
+                <form th:action="@{'/memo/category/' + ${category.id} + '/delete'}" method="post">
+                    <button type="submit" class="danger-btn" onclick="return confirm('确认删除这个分类吗？分类下有文件时将删除失败。')">删除分类</button>
+                </form>
+            </div>
+            <div class="empty-state" th:if="${groupedFiles[category.id] == null || groupedFiles[category.id].isEmpty()}">
+                <p>该分类下还没有文件。</p>
+            </div>
+            <div class="record-list" th:if="${groupedFiles[category.id] != null && !groupedFiles[category.id].isEmpty()}">
+                <article class="record-card" th:each="file : ${groupedFiles[category.id]}">
+                    <div class="record-main">
+                        <h4 th:text="${file.fileName}">文件名</h4>
+                        <p class="record-date" th:text="${#numbers.formatDecimal(file.fileSize / 1024.0, 1, 2)} + ' KB'">0 KB</p>
+                        <p class="record-content" th:text="${file.remark} ?: '无备注'">备注</p>
+                    </div>
+                    <div class="action-group">
+                        <a class="secondary-btn" th:href="@{'/memo/file/' + ${file.id} + '/download'}">下载</a>
+                        <form th:action="@{'/memo/file/' + ${file.id} + '/delete'}" method="post">
+                            <button type="submit" class="danger-btn" onclick="return confirm('确认删除这个文件吗？')">删除</button>
+                        </form>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
 </main>
 </body>
 </html>

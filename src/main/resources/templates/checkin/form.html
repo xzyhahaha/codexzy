@@ -10,7 +10,7 @@
 <header class="topbar">
     <div>
         <h1>新建打卡</h1>
-        <p>当前版本先支持标题和内容，附件会在下一阶段接入</p>
+        <p>记录今天完成的事情、推进的内容和遇到的问题</p>
     </div>
     <nav class="nav-actions">
         <a th:href="@{/checkin}">返回列表</a>
@@ -20,8 +20,6 @@
 <main class="page-grid">
     <section class="panel">
         <form th:action="@{/checkin}" th:object="${formDTO}" method="post" class="form-grid">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-
             <label>
                 <span>标题</span>
                 <input type="text" th:field="*{title}" placeholder="例如：完成今日算法练习">

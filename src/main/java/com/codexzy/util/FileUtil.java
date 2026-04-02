@@ -34,4 +34,21 @@ public final class FileUtil {
             throw new UncheckedIOException("保存文件失败", ex);
         }
     }
+
+    public static Path resolve(String rootDir, String relativePath) {
+        return Paths.get(rootDir).toAbsolutePath().normalize().resolve(relativePath).normalize();
+    }
+
+    public static void delete(String rootDir, String relativePath) {
+        if (!StringUtils.hasText(relativePath)) {
+            return;
+        }
+
+        Path path = resolve(rootDir, relativePath);
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException ex) {
+            throw new UncheckedIOException("删除文件失败", ex);
+        }
+    }
 }

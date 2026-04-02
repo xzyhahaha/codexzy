@@ -17,7 +17,6 @@
         <a th:href="@{/memo}">备忘录</a>
         <a th:href="@{/user/profile}">个人设置</a>
         <form th:action="@{/logout}" method="post">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             <button type="submit" class="link-btn">退出</button>
         </form>
     </nav>
@@ -25,8 +24,8 @@
 
 <main class="dashboard">
     <section class="hero-panel">
-        <h2>本阶段已完成用户认证与基础面板</h2>
-        <p>后续可以继续在此基础上接入打卡列表、日历视图、附件管理和备忘录文件管理。</p>
+        <h2>你的记录工作台</h2>
+        <p>这里集中展示打卡进度、资料数量和常用入口，适合作为日常使用的默认首页。</p>
     </section>
 
     <section class="stats-grid">
@@ -51,11 +50,11 @@
     <section class="quick-links">
         <a class="feature-card" th:href="@{/checkin}">
             <h3>打卡模块</h3>
-            <p>当前已支持打卡列表、新建和删除，下一步继续接日历和附件上传。</p>
+            <p>支持新增、列表、删除和月历查看，适合每天沉淀学习或工作记录。</p>
         </a>
         <a class="feature-card" th:href="@{/memo}">
             <h3>备忘录模块</h3>
-            <p>进入文件与分类管理占位页，下一步接上传、下载和删除逻辑。</p>
+            <p>支持分类、上传、下载和删除文件，用来整理资料、证书和项目附件。</p>
         </a>
     </section>
 </main>

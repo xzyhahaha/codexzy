@@ -9,13 +9,11 @@
 <body class="auth-body">
 <div class="auth-card">
     <h1>创建账号</h1>
-    <p class="auth-subtitle">先完成用户模块，再继续接入打卡和备忘录功能</p>
+    <p class="auth-subtitle">先完成注册，再开始记录打卡和管理资料</p>
 
     <div class="alert error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
 
     <form th:action="@{/register}" th:object="${registerDTO}" method="post" class="form-grid">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-
         <label>
             <span>用户名</span>
             <input type="text" th:field="*{username}" placeholder="4 到 50 个字符">

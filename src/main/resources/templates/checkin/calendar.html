@@ -3,14 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>打卡日历 - codexzy</title>
+    <title>打卡月历 - codexzy</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body class="app-body">
-<main class="placeholder-page">
-    <h1>打卡日历</h1>
-    <p>页面入口已建立，下一步实现月份切换和日期高亮。</p>
-    <a th:href="@{/}" class="primary-btn">返回首页</a>
+<header class="topbar">
+    <div>
+        <h1>打卡月历</h1>
+        <p th:text="${currentLabel}">2026 年 4 月</p>
+    </div>
+    <nav class="nav-actions">
+        <a th:href="@{/checkin}">返回列表</a>
+        <a th:href="@{'/checkin/calendar?year=' + ${prev.year} + '&month=' + ${prev.monthValue}}">上个月</a>
+        <a th:href="@{'/checkin/calendar?year=' + ${next.year} + '&month=' + ${next.monthValue}}">下个月</a>
+    </nav>
+</header>
+
+<main class="page-grid">
+    <section class="panel">
+        <div class="calendar-grid calendar-head">
+            <span>一</span>
+            <span>二</span>
+            <span>三</span>
+            <span>四</span>
+            <span>五</span>
+            <span>六</span>
+            <span>日</span>
+        </div>
+        <div class="calendar-grid">
+            <div th:each="day : ${calendarDays}"
+                 th:class="'calendar-cell ' + (${day.currentMonth} ? '' : 'calendar-empty ') + (${day.checkedIn} ? 'calendar-checked ' : '') + (${day.today} ? 'calendar-today' : '')">
+                <span th:text="${day.currentMonth} ? ${day.dayOfMonth} : ''"></span>
+            </div>
+        </div>
+        <p class="calendar-tip">高亮日期表示当月已有打卡记录。</p>
+    </section>
 </main>
 </body>
 </html>
