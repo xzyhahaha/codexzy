@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - codexzy</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="auth-body">
+<div class="auth-card">
+    <h1>欢迎回来</h1>
+    <p class="auth-subtitle">登录后进入你的打卡与备忘录面板</p>
+
+    <div class="alert success" th:if="${successMessage}" th:text="${successMessage}"></div>
+    <div class="alert error" th:if="${param.error}">用户名或密码错误，请重试。</div>
+    <div class="alert success" th:if="${param.logout}">你已安全退出。</div>
+
+    <form th:action="@{/login}" method="post" class="form-grid">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+        <label>
+            <span>用户名</span>
+            <input type="text" name="username" placeholder="请输入用户名" required>
+        </label>
+
+        <label>
+            <span>密码</span>
+            <input type="password" name="password" placeholder="请输入密码" required>
+        </label>
+
+        <label class="checkbox-row">
+            <input type="checkbox" name="remember-me">
+            <span>记住我</span>
+        </label>
+
+        <button type="submit" class="primary-btn">登录</button>
+    </form>
+
+    <p class="auth-footer">还没有账号？<a th:href="@{/register}">立即注册</a></p>
+</div>
+</body>
+</html>

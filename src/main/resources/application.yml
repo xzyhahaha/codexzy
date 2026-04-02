@@ -6,6 +6,10 @@ spring:
     url: jdbc:mysql://localhost:3306/codexzy?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: root
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
   thymeleaf:
     cache: false
     prefix: classpath:/templates/
@@ -16,10 +20,6 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 50MB
-  security:
-    user:
-      name: admin
-      password: admin
 
 mybatis-plus:
   configuration:
@@ -28,6 +28,7 @@ mybatis-plus:
   global-config:
     db-config:
       id-type: auto
+      table-underline: true
   mapper-locations: classpath:mapper/*.xml
 
 file:
