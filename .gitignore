@@ -12,3 +12,5 @@ uploads/checkin/*
 uploads/memo/*
 !uploads/checkin/.gitkeep
 !uploads/memo/.gitkeep
+
+src/main/resources/application-prod.yml
