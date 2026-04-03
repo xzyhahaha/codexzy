@@ -8,11 +8,11 @@ import lombok.Data;
 @Data
 public class UserProfileUpdateDTO {
 
-    @NotBlank(message = "昵称不能为空")
-    @Size(max = 50, message = "昵称不能超过 50 个字符")
+    @NotBlank(message = "请输入昵称")
+    @Size(max = 32, message = "昵称长度不能超过 32 个字符")
     private String nickname;
 
-    @NotBlank(message = "邮箱不能为空")
+    @NotBlank(message = "请输入邮箱")
     @Email(message = "邮箱格式不正确")
     private String email;
 }

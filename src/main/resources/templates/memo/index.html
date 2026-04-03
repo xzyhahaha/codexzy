@@ -1,97 +1,180 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>备忘录管理 - codexzy</title>
+    <title>备忘资料库 - codexzy</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="app-body">
-<header class="topbar">
-    <div>
-        <h1>备忘录管理</h1>
-        <p>按分类整理文件，支持上传、下载和删除</p>
-    </div>
-    <nav class="nav-actions">
-        <a th:href="@{/}">返回首页</a>
-    </nav>
-</header>
-
-<main class="page-grid">
-    <div class="alert success" th:if="${successMessage}" th:text="${successMessage}"></div>
-    <div class="alert error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
-
-    <section class="panel">
-        <h2>新建分类</h2>
-        <form th:action="@{/memo/category}" th:object="${categoryForm}" method="post" class="form-grid">
-            <label>
-                <span>分类名称</span>
-                <input type="text" th:field="*{categoryName}" placeholder="例如：简历、证书、项目资料">
-                <small class="field-error" th:if="${#fields.hasErrors('categoryName')}" th:errors="*{categoryName}"></small>
-            </label>
-            <button type="submit" class="primary-btn">创建分类</button>
-        </form>
-    </section>
-
-    <section class="panel">
-        <h2>上传文件</h2>
-        <div class="empty-state" th:if="${categories.isEmpty()}">
-            <p>请先创建分类，再上传文件。</p>
-        </div>
-        <form th:if="${!categories.isEmpty()}" th:action="@{/memo/upload}" th:object="${uploadForm}" method="post" enctype="multipart/form-data" class="form-grid">
-            <label>
-                <span>分类</span>
-                <select th:field="*{categoryId}">
-                    <option value="">请选择分类</option>
-                    <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.categoryName}"></option>
-                </select>
-                <small class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></small>
-            </label>
-            <label>
-                <span>文件</span>
-                <input type="file" th:field="*{file}">
-            </label>
-            <label>
-                <span>备注</span>
-                <textarea th:field="*{remark}" rows="4" placeholder="可选，记录文件说明"></textarea>
-                <small class="field-error" th:if="${#fields.hasErrors('remark')}" th:errors="*{remark}"></small>
-            </label>
-            <button type="submit" class="primary-btn">上传文件</button>
-        </form>
-    </section>
-
-    <section class="panel">
-        <h2>文件列表</h2>
-        <div class="empty-state" th:if="${categories.isEmpty()}">
-            <p>当前还没有分类。</p>
-        </div>
-        <div class="category-block" th:each="category : ${categories}">
-            <div class="category-header">
-                <h3 th:text="${category.categoryName}">分类</h3>
-                <form th:action="@{'/memo/category/' + ${category.id} + '/delete'}" method="post">
-                    <button type="submit" class="danger-btn" onclick="return confirm('确认删除这个分类吗？分类下有文件时将删除失败。')">删除分类</button>
-                </form>
+<body class="site-body">
+<div class="site-shell">
+    <header class="site-masthead reveal">
+        <div class="brand-block">
+            <a class="brand-mark" th:href="@{/}">CZ</a>
+            <div class="brand-copy">
+                <span class="section-tag">Memo Library</span>
+                <h1>备忘资料库</h1>
+                <p th:text="|当前有 ${categoryCount} 个分类，已归档 ${fileCount} 个文件|">当前有 0 个分类，已归档 0 个文件</p>
             </div>
-            <div class="empty-state" th:if="${groupedFiles[category.id] == null || groupedFiles[category.id].isEmpty()}">
-                <p>该分类下还没有文件。</p>
-            </div>
-            <div class="record-list" th:if="${groupedFiles[category.id] != null && !groupedFiles[category.id].isEmpty()}">
-                <article class="record-card" th:each="file : ${groupedFiles[category.id]}">
-                    <div class="record-main">
-                        <h4 th:text="${file.fileName}">文件名</h4>
-                        <p class="record-date" th:text="${#numbers.formatDecimal(file.fileSize / 1024.0, 1, 2)} + ' KB'">0 KB</p>
-                        <p class="record-content" th:text="${file.remark} ?: '无备注'">备注</p>
+        </div>
+        <nav class="header-actions">
+            <a class="ghost-btn" th:href="@{/}">返回首页</a>
+            <a class="ghost-btn" th:href="@{/checkin}">打卡档案</a>
+        </nav>
+    </header>
+
+    <main class="page-stack">
+        <div class="flash-stack reveal">
+            <div class="flash-banner success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="flash-banner error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+        </div>
+
+        <section class="content-grid reveal">
+            <article class="section-card main-column">
+                <div class="section-head">
+                    <div>
+                        <span class="section-tag">Upload Studio</span>
+                        <h3>文件拖进来，或者直接粘贴上传</h3>
                     </div>
-                    <div class="action-group">
-                        <a class="secondary-btn" th:href="@{'/memo/file/' + ${file.id} + '/download'}">下载</a>
-                        <form th:action="@{'/memo/file/' + ${file.id} + '/delete'}" method="post">
-                            <button type="submit" class="danger-btn" onclick="return confirm('确认删除这个文件吗？')">删除</button>
+                    <div class="badge-row">
+                        <span class="status-pill">拖拽上传</span>
+                        <span class="status-pill">粘贴上传</span>
+                        <span class="status-pill">点击选择</span>
+                    </div>
+                </div>
+
+                <div class="empty-panel" th:if="${categories.isEmpty()}">
+                    <h4>还没有可用分类</h4>
+                    <p>先在右侧创建分类，再开始上传资料。</p>
+                </div>
+
+                <form th:if="${!categories.isEmpty()}" th:action="@{/memo/upload}" th:object="${uploadForm}" method="post" enctype="multipart/form-data" class="form-stack">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                    <label>
+                        <span>选择分类</span>
+                        <select th:field="*{categoryId}">
+                            <option value="">请选择分类</option>
+                            <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.categoryName}"></option>
+                        </select>
+                        <small class="field-error" th:if="${#fields.hasErrors('categoryId')}" th:errors="*{categoryId}"></small>
+                    </label>
+
+                    <div class="upload-zone" id="memoDropzone" tabindex="0" role="button" aria-label="拖拽文件或粘贴文件上传">
+                        <input type="file" th:field="*{file}" id="memoFileInput" class="native-file-input">
+                        <div class="upload-zone-inner">
+                            <div class="upload-glyph">+</div>
+                            <div class="upload-copy">
+                                <h4>把文件拖到这里</h4>
+                                <p>也可以点击此区域选择文件，或者在页面里直接按 <strong>Ctrl + V</strong> / <strong>Command + V</strong> 粘贴文件。</p>
+                            </div>
+                            <div class="upload-meta" id="memoFileMeta">当前还没有选择文件</div>
+                        </div>
+                    </div>
+                    <small class="field-error" th:if="${#fields.hasErrors('file')}" th:errors="*{file}"></small>
+
+                    <label>
+                        <span>备注</span>
+                        <textarea th:field="*{remark}" rows="4" placeholder="例如：投递版简历、项目流程图、备案截图、学习资料等"></textarea>
+                        <small class="field-error" th:if="${#fields.hasErrors('remark')}" th:errors="*{remark}"></small>
+                    </label>
+
+                    <div class="form-actions-row">
+                        <button type="submit" class="solid-btn">上传文件</button>
+                        <span class="field-hint">上传后会直接归档到对应分类。</span>
+                    </div>
+                </form>
+            </article>
+
+            <aside class="section-card sticky-card side-tone">
+                <div class="section-head">
+                    <div>
+                        <span class="section-tag">Category Studio</span>
+                        <h3>先把资料结构搭起来</h3>
+                    </div>
+                </div>
+
+                <form th:action="@{/memo/category}" th:object="${categoryForm}" method="post" class="form-stack">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                    <label>
+                        <span>分类名称</span>
+                        <input type="text" th:field="*{categoryName}" placeholder="例如：简历 / 项目文档 / 证书 / 备案截图">
+                        <small class="field-error" th:if="${#fields.hasErrors('categoryName')}" th:errors="*{categoryName}"></small>
+                    </label>
+
+                    <button type="submit" class="solid-btn">创建分类</button>
+                </form>
+
+                <div class="bullet-grid compact-bullets">
+                    <article>
+                        <strong th:text="${categoryCount}">0</strong>
+                        <p>分类数量</p>
+                    </article>
+                    <article>
+                        <strong th:text="${fileCount}">0</strong>
+                        <p>文件数量</p>
+                    </article>
+                </div>
+            </aside>
+        </section>
+
+        <section class="section-card reveal">
+            <div class="section-head">
+                <div>
+                    <span class="section-tag">Archive</span>
+                    <h3>按分类查看所有归档文件</h3>
+                </div>
+            </div>
+
+            <div class="empty-panel" th:if="${categories.isEmpty()}">
+                <h4>还没有分类</h4>
+                <p>创建一个分类后，这里会显示对应的文件归档列表。</p>
+            </div>
+
+            <div class="archive-stack" th:each="category : ${categories}" th:with="files=${groupedFiles[category.id]}">
+                <div class="archive-group">
+                    <div class="archive-head">
+                        <div>
+                            <h4 th:text="${category.categoryName}">分类</h4>
+                            <p th:text="${files == null ? '当前还没有文件' : '当前共 ' + files.size() + ' 个文件'}">当前还没有文件</p>
+                        </div>
+                        <form th:action="@{'/memo/category/' + ${category.id} + '/delete'}" method="post">
+                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                            <button type="submit" class="danger-btn small-btn" onclick="return confirm('确认删除这个分类吗？如果分类下还有文件会删除失败。')">删除分类</button>
                         </form>
                     </div>
-                </article>
+
+                    <div class="empty-panel small-empty" th:if="${files == null || files.isEmpty()}">
+                        <p>这个分类下还没有文件。</p>
+                    </div>
+
+                    <div class="entry-list" th:if="${files != null && !files.isEmpty()}">
+                        <article class="entry-card compact-card" th:each="file : ${files}">
+                            <div class="entry-stamp small-stamp">
+                                <span th:text="${#numbers.formatDecimal(file.fileSize / 1024.0, 1, 1)} + 'KB'">0KB</span>
+                                <small th:text="${#temporals.format(file.createTime, 'MM-dd HH:mm')}">04-02 12:00</small>
+                            </div>
+                            <div class="entry-body">
+                                <div class="entry-head">
+                                    <h4 th:text="${file.fileName}">文件名</h4>
+                                    <div class="entry-actions">
+                                        <a class="ghost-btn small-btn" th:href="@{'/memo/file/' + ${file.id} + '/download'}">下载</a>
+                                        <form th:action="@{'/memo/file/' + ${file.id} + '/delete'}" method="post">
+                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                            <button type="submit" class="danger-btn small-btn" onclick="return confirm('确认删除这个文件吗？')">删除</button>
+                                        </form>
+                                    </div>
+                                </div>
+                                <p th:text="${#strings.isEmpty(file.remark) ? '没有填写备注。' : file.remark}">备注</p>
+                            </div>
+                        </article>
+                    </div>
+                </div>
             </div>
-        </div>
-    </section>
-</main>
+        </section>
+    </main>
+</div>
+<script th:src="@{/js/memo-upload.js}"></script>
 </body>
 </html>

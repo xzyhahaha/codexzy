@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class MemoCategoryFormDTO {
 
-    @NotBlank(message = "分类名称不能为空")
-    @Size(max = 50, message = "分类名称不能超过 50 个字符")
+    @NotBlank(message = "请输入分类名称")
+    @Size(max = 40, message = "分类名称不能超过 40 个字符")
     private String categoryName;
 }

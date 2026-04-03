@@ -49,6 +49,7 @@ public class MemoController {
         User currentUser = userService.getByUsername(authentication.getName());
         List<MemoCategory> categories = memoService.listCategories(currentUser.getId());
         Map<Long, List<MemoFile>> groupedFiles = memoService.listFilesGroupedByCategory(currentUser.getId());
+        long fileCount = groupedFiles.values().stream().mapToLong(List::size).sum();
 
         if (!model.containsAttribute("categoryForm")) {
             model.addAttribute("categoryForm", new MemoCategoryFormDTO());
@@ -57,8 +58,11 @@ public class MemoController {
             model.addAttribute("uploadForm", new MemoUploadDTO());
         }
 
+        model.addAttribute("currentUser", currentUser);
         model.addAttribute("categories", categories);
         model.addAttribute("groupedFiles", groupedFiles);
+        model.addAttribute("categoryCount", categories.size());
+        model.addAttribute("fileCount", fileCount);
         return "memo/index";
     }
 
@@ -130,7 +134,8 @@ public class MemoController {
 
         org.springframework.core.io.Resource resource = new FileSystemResource(filePath);
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment().filename(memoFile.getFileName()).build().toString())
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        ContentDisposition.attachment().filename(memoFile.getFileName()).build().toString())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
     }

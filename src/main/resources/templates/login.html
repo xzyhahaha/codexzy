@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -6,36 +6,68 @@
     <title>登录 - codexzy</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="auth-body">
-<div class="auth-card">
-    <h1>欢迎回来</h1>
-    <p class="auth-subtitle">登录后进入你的打卡与备忘录工作台</p>
+<body class="auth-page">
+<div class="auth-layout">
+    <section class="auth-story reveal">
+        <div class="story-topline">
+            <span class="brand-ribbon">codexzy</span>
+            <span class="section-tag">记录 / 整理 / 回顾</span>
+        </div>
+        <h1>把零散的日常，变成有节奏感的个人工作流。</h1>
+        <p>登录后你会得到一套连贯的记录面板：打卡负责沉淀每天的动作，备忘录负责整理资料，月历负责帮你回看时间线。</p>
+        <div class="story-grid">
+            <article>
+                <strong>每日打卡</strong>
+                <p>支持补卡、编辑和月历视图，不会把记录锁死在单页表单里。</p>
+            </article>
+            <article>
+                <strong>资料归档</strong>
+                <p>拖拽上传、粘贴上传、下载和删除都在同一页完成。</p>
+            </article>
+            <article>
+                <strong>回看路径</strong>
+                <p>月历上的每一天都能点进去，直接看当天到底写了什么。</p>
+            </article>
+        </div>
+    </section>
 
-    <div class="alert success" th:if="${successMessage}" th:text="${successMessage}"></div>
-    <div class="alert error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
-    <div class="alert error" th:if="${param.error}">用户名或密码错误，请重试。</div>
-    <div class="alert success" th:if="${param.logout}">你已安全退出。</div>
+    <section class="auth-panel reveal">
+        <div class="auth-panel-header">
+            <span class="section-tag">Sign In</span>
+            <h2>欢迎回来</h2>
+            <p>继续你的记录节奏。</p>
+        </div>
 
-    <form th:action="@{/login}" method="post" class="form-grid">
-        <label>
-            <span>用户名</span>
-            <input type="text" name="username" placeholder="请输入用户名" required>
-        </label>
+        <div class="flash-stack">
+            <div class="flash-banner success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="flash-banner error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+            <div class="flash-banner error" th:if="${param.error}">用户名或密码错误，请重新输入。</div>
+            <div class="flash-banner success" th:if="${param.logout}">你已安全退出。</div>
+        </div>
 
-        <label>
-            <span>密码</span>
-            <input type="password" name="password" placeholder="请输入密码" required>
-        </label>
+        <form th:action="@{/login}" method="post" class="form-stack">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
-        <label class="checkbox-row">
-            <input type="checkbox" name="remember-me">
-            <span>记住我</span>
-        </label>
+            <label>
+                <span>用户名</span>
+                <input type="text" name="username" placeholder="请输入用户名" required>
+            </label>
 
-        <button type="submit" class="primary-btn">登录</button>
-    </form>
+            <label>
+                <span>密码</span>
+                <input type="password" name="password" placeholder="请输入密码" required>
+            </label>
 
-    <p class="auth-footer">还没有账号？<a th:href="@{/register}">立即注册</a></p>
+            <label class="checkbox-inline">
+                <input type="checkbox" name="remember-me">
+                <span>记住我</span>
+            </label>
+
+            <button type="submit" class="solid-btn wide-btn">登录</button>
+        </form>
+
+        <p class="form-footer">还没有账号？<a th:href="@{/register}">立即注册</a></p>
+    </section>
 </div>
 </body>
 </html>

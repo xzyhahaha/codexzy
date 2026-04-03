@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -6,38 +6,92 @@
     <title>打卡月历 - codexzy</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="app-body">
-<header class="topbar">
-    <div>
-        <h1>打卡月历</h1>
-        <p th:text="${currentLabel}">2026 年 4 月</p>
-    </div>
-    <nav class="nav-actions">
-        <a th:href="@{/checkin}">返回列表</a>
-        <a th:href="@{'/checkin/calendar?year=' + ${prev.year} + '&month=' + ${prev.monthValue}}">上个月</a>
-        <a th:href="@{'/checkin/calendar?year=' + ${next.year} + '&month=' + ${next.monthValue}}">下个月</a>
-    </nav>
-</header>
-
-<main class="page-grid">
-    <section class="panel">
-        <div class="calendar-grid calendar-head">
-            <span>一</span>
-            <span>二</span>
-            <span>三</span>
-            <span>四</span>
-            <span>五</span>
-            <span>六</span>
-            <span>日</span>
-        </div>
-        <div class="calendar-grid">
-            <div th:each="day : ${calendarDays}"
-                 th:class="'calendar-cell ' + (${day.currentMonth} ? '' : 'calendar-empty ') + (${day.checkedIn} ? 'calendar-checked ' : '') + (${day.today} ? 'calendar-today' : '')">
-                <span th:text="${day.currentMonth} ? ${day.dayOfMonth} : ''"></span>
+<body class="site-body">
+<div class="site-shell">
+    <header class="site-masthead reveal">
+        <div class="brand-block">
+            <a class="brand-mark" th:href="@{/}">CZ</a>
+            <div class="brand-copy">
+                <span class="section-tag">Calendar View</span>
+                <h1>打卡月历</h1>
+                <p th:text="${currentLabel}">2026年4月</p>
             </div>
         </div>
-        <p class="calendar-tip">高亮日期表示当月已有打卡记录。</p>
-    </section>
-</main>
+        <nav class="header-actions">
+            <a class="ghost-btn" th:href="@{/checkin}">打卡列表</a>
+            <a class="ghost-btn" th:href="@{'/checkin/calendar?year=' + ${prev.year} + '&month=' + ${prev.monthValue}}">上个月</a>
+            <a class="ghost-btn" th:href="@{'/checkin/calendar?year=' + ${next.year} + '&month=' + ${next.monthValue}}">下个月</a>
+        </nav>
+    </header>
+
+    <main class="page-stack">
+        <section class="content-grid reveal">
+            <article class="section-card main-column">
+                <div class="section-head">
+                    <div>
+                        <span class="section-tag">Monthly Grid</span>
+                        <h3>日期上直接显示记录摘要</h3>
+                    </div>
+                    <span class="status-pill">点击任意日期可进入当天详情</span>
+                </div>
+
+                <div class="calendar-week">
+                    <span>一</span>
+                    <span>二</span>
+                    <span>三</span>
+                    <span>四</span>
+                    <span>五</span>
+                    <span>六</span>
+                    <span>日</span>
+                </div>
+
+                <div class="calendar-board">
+                    <a th:each="day : ${calendarDays}"
+                       th:href="@{'/checkin/day?date=' + ${#temporals.format(day.date, 'yyyy-MM-dd')}}"
+                       class="calendar-card"
+                       th:classappend="(${day.currentMonth} ? '' : ' is-muted') + (${day.checkedIn} ? ' is-active' : '') + (${day.today} ? ' is-today' : '')">
+                        <div class="calendar-card-top">
+                            <span class="calendar-day-number" th:text="${day.dayOfMonth}">1</span>
+                            <span class="calendar-count" th:text="${day.recordCount > 0 ? day.recordCount + ' 条' : '空白'}">空白</span>
+                        </div>
+                        <div class="calendar-card-body">
+                            <strong th:text="${day.primaryTitle != null && !day.primaryTitle.isEmpty() ? day.primaryTitle : '当天暂无记录'}">当天暂无记录</strong>
+                            <span class="calendar-link-hint" th:text="${day.checkedIn} ? '查看当天记录' : '点击补充当天内容'">查看当天记录</span>
+                        </div>
+                    </a>
+                </div>
+            </article>
+
+            <aside class="section-card sticky-card side-tone">
+                <div class="section-head">
+                    <div>
+                        <span class="section-tag">Legend</span>
+                        <h3>怎么看这张月历</h3>
+                    </div>
+                </div>
+                <div class="legend-list">
+                    <div class="legend-item"><span class="legend-swatch active"></span><p>高亮日期表示当天存在打卡记录。</p></div>
+                    <div class="legend-item"><span class="legend-swatch today"></span><p>描边日期表示今天。</p></div>
+                    <div class="legend-item"><span class="legend-swatch muted"></span><p>浅色日期是补齐月历结构的前后月份。</p></div>
+                </div>
+                <div class="bullet-grid">
+                    <article>
+                        <strong th:text="${stats.totalCheckInDays}">0</strong>
+                        <p>累计打卡天数</p>
+                    </article>
+                    <article>
+                        <strong th:text="${stats.currentStreakDays}">0</strong>
+                        <p>当前连续打卡</p>
+                    </article>
+                    <article>
+                        <strong th:text="${stats.currentMonthCount}">0</strong>
+                        <p>本月打卡次数</p>
+                    </article>
+                </div>
+            </aside>
+        </section>
+    </main>
+</div>
 </body>
 </html>
+

@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日期详情 - codexzy</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="site-body">
+<div class="site-shell">
+    <header class="site-masthead reveal">
+        <div class="brand-block">
+            <a class="brand-mark" th:href="@{/}">CZ</a>
+            <div class="brand-copy">
+                <span class="section-tag">Date Detail</span>
+                <h1 th:text="${selectedDateLabel}">2026年4月2日</h1>
+                <p th:text="|这一天共有 ${records.size()} 条记录|">这一天共有 0 条记录</p>
+            </div>
+        </div>
+        <nav class="header-actions detail-nav">
+            <a class="ghost-btn" th:href="@{/checkin/calendar}">返回月历</a>
+            <a class="ghost-btn" th:href="@{'/checkin/day?date=' + ${#temporals.format(previousDate, 'yyyy-MM-dd')}}">前一天</a>
+            <a class="ghost-btn" th:if="${allowNextDate}" th:href="@{'/checkin/day?date=' + ${#temporals.format(nextDate, 'yyyy-MM-dd')}}">后一天</a>
+            <a class="solid-btn" th:href="@{'/checkin/form?date=' + ${#temporals.format(selectedDate, 'yyyy-MM-dd')}}">补一条当天记录</a>
+        </nav>
+    </header>
+
+    <main class="page-stack">
+        <section class="content-grid reveal">
+            <article class="section-card main-column">
+                <div class="section-head">
+                    <div>
+                        <span class="section-tag">Records</span>
+                        <h3>当天所有打卡内容</h3>
+                    </div>
+                </div>
+
+                <div class="empty-panel" th:if="${records.isEmpty()}">
+                    <h4>这一天还没有记录</h4>
+                    <p>如果这一天确实做了事，可以直接补一条；补完以后月历会立刻出现数据摘要。</p>
+                    <a class="solid-btn" th:href="@{'/checkin/form?date=' + ${#temporals.format(selectedDate, 'yyyy-MM-dd')}}">现在补卡</a>
+                </div>
+
+                <div class="entry-list" th:if="${!records.isEmpty()}">
+                    <article class="entry-card" th:each="item : ${records}">
+                        <div class="entry-stamp large-stamp">
+                            <span th:text="${#temporals.format(item.checkDate, 'MM-dd')}">04-02</span>
+                            <small th:text="${#temporals.format(item.updateTime, 'HH:mm 更新')}">12:00 更新</small>
+                        </div>
+                        <div class="entry-body">
+                            <div class="entry-head">
+                                <h4 th:text="${item.title}">标题</h4>
+                                <div class="entry-actions">
+                                    <a class="ghost-btn small-btn" th:href="@{'/checkin/' + ${item.id} + '/edit'}">编辑</a>
+                                </div>
+                            </div>
+                            <p th:text="${#strings.isEmpty(item.content) ? '这条记录没有填写详细内容。' : item.content}">内容</p>
+                        </div>
+                    </article>
+                </div>
+            </article>
+
+            <aside class="section-card sticky-card side-tone">
+                <div class="section-head">
+                    <div>
+                        <span class="section-tag">Snapshot</span>
+                        <h3>这一天在整个月里的位置</h3>
+                    </div>
+                </div>
+                <div class="bullet-grid">
+                    <article>
+                        <strong th:text="${records.size()}">0</strong>
+                        <p>当天记录数</p>
+                    </article>
+                    <article>
+                        <strong th:text="${stats.currentStreakDays}">0</strong>
+                        <p>当前连续打卡</p>
+                    </article>
+                    <article>
+                        <strong th:text="${stats.currentMonthCount}">0</strong>
+                        <p>本月打卡次数</p>
+                    </article>
+                </div>
+                <div class="note-panel">
+                    <p>这里负责聚焦“某一天”。如果你想看全局节奏，用月历；如果想快速浏览所有内容，用打卡列表。</p>
+                </div>
+            </aside>
+        </section>
+    </main>
+</div>
+</body>
+</html>

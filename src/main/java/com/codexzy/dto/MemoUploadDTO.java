@@ -11,8 +11,9 @@ public class MemoUploadDTO {
     @NotNull(message = "请选择分类")
     private Long categoryId;
 
-    @Size(max = 500, message = "备注不能超过 500 个字符")
+    @Size(max = 255, message = "备注不能超过 255 个字符")
     private String remark;
 
+    @NotNull(message = "请选择要上传的文件")
     private MultipartFile file;
 }

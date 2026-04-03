@@ -1,53 +1,109 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>打卡列表 - codexzy</title>
+    <title>打卡档案 - codexzy</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="app-body">
-<header class="topbar">
-    <div>
-        <h1>打卡列表</h1>
-        <p>记录你每天的学习、训练或工作进展</p>
-    </div>
-    <nav class="nav-actions">
-        <a th:href="@{/}">返回首页</a>
-        <a th:href="@{/checkin/calendar}">月历视图</a>
-        <a th:href="@{/checkin/form}" class="primary-btn">新建打卡</a>
-    </nav>
-</header>
+<body class="site-body">
+<div class="site-shell">
+    <header class="site-masthead reveal">
+        <div class="brand-block">
+            <a class="brand-mark" th:href="@{/}">CZ</a>
+            <div class="brand-copy">
+                <span class="section-tag">Check-In Archive</span>
+                <h1>打卡档案</h1>
+                <p th:text="|共 ${pageData.total} 条记录，按日期倒序展示|">共 0 条记录，按日期倒序展示</p>
+            </div>
+        </div>
+        <nav class="header-actions">
+            <a class="ghost-btn" th:href="@{/checkin/calendar}">月历视图</a>
+            <a class="ghost-btn" th:href="@{/}">返回首页</a>
+            <a class="solid-btn" th:href="@{/checkin/form}">新建打卡</a>
+        </nav>
+    </header>
 
-<main class="page-grid">
-    <div class="alert success" th:if="${successMessage}" th:text="${successMessage}"></div>
-    <div class="alert error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
-
-    <section class="panel">
-        <div class="empty-state" th:if="${pageData.records.isEmpty()}">
-            <h2>还没有打卡记录</h2>
-            <p>先创建第一条记录，首页统计就会开始累计。</p>
+    <main class="page-stack">
+        <div class="flash-stack reveal">
+            <div class="flash-banner success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="flash-banner error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
         </div>
 
-        <div class="record-list" th:if="${!pageData.records.isEmpty()}">
-            <article class="record-card" th:each="item : ${pageData.records}">
-                <div class="record-main">
-                    <h3 th:text="${item.title}">标题</h3>
-                    <p class="record-date" th:text="${#temporals.format(item.checkDate, 'yyyy-MM-dd')}">2026-04-02</p>
-                    <p class="record-content" th:text="${item.content} ?: '暂无内容'">内容</p>
+        <section class="content-grid reveal">
+            <article class="section-card main-column">
+                <div class="section-head">
+                    <div>
+                        <span class="section-tag">Timeline</span>
+                        <h3>所有打卡记录</h3>
+                    </div>
                 </div>
-                <form th:action="@{'/checkin/' + ${item.id} + '/delete'}" method="post">
-                    <button type="submit" class="danger-btn" onclick="return confirm('确认删除这条打卡记录吗？')">删除</button>
-                </form>
-            </article>
-        </div>
-    </section>
 
-    <section class="panel pager" th:if="${pageData.pages > 1}">
-        <a th:if="${pageData.current > 1}" th:href="@{'/checkin?page=' + ${pageData.current - 1}}">上一页</a>
-        <span th:text="'第 ' + ${pageData.current} + ' / ' + ${pageData.pages} + ' 页'"></span>
-        <a th:if="${pageData.current < pageData.pages}" th:href="@{'/checkin?page=' + ${pageData.current + 1}}">下一页</a>
-    </section>
-</main>
+                <div class="empty-panel" th:if="${pageData.records.isEmpty()}">
+                    <h4>还没有打卡内容</h4>
+                    <p>先写下今天做了什么，后面就能在月历和日期详情里直接回看。</p>
+                    <a class="solid-btn" th:href="@{/checkin/form}">去写第一条</a>
+                </div>
+
+                <div class="entry-list" th:if="${!pageData.records.isEmpty()}">
+                    <article class="entry-card" th:each="item : ${pageData.records}">
+                        <div class="entry-stamp large-stamp">
+                            <span th:text="${#temporals.format(item.checkDate, 'MM-dd')}">04-02</span>
+                            <small th:text="${#temporals.format(item.checkDate, 'yyyy / E')}">2026 / 周四</small>
+                        </div>
+                        <div class="entry-body">
+                            <div class="entry-head">
+                                <h4 th:text="${item.title}">标题</h4>
+                                <div class="entry-actions">
+                                    <a class="ghost-btn small-btn" th:href="@{'/checkin/' + ${item.id} + '/edit'}">编辑</a>
+                                    <form th:action="@{'/checkin/' + ${item.id} + '/delete'}" method="post">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <button type="submit" class="danger-btn small-btn" onclick="return confirm('确认删除这条打卡记录吗？')">删除</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <p th:text="${#strings.isEmpty(item.content) ? '这条记录没有填写详细内容。' : item.content}">内容</p>
+                            <div class="entry-meta">
+                                <span class="status-pill" th:text="${#temporals.format(item.updateTime, 'yyyy-MM-dd HH:mm')} + ' 更新'">2026-04-02 12:00 更新</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </article>
+
+            <aside class="section-card sticky-card side-tone">
+                <div class="section-head">
+                    <div>
+                        <span class="section-tag">Overview</span>
+                        <h3>记录节奏</h3>
+                    </div>
+                </div>
+                <div class="bullet-grid">
+                    <article>
+                        <strong th:text="${stats.totalCheckInDays}">0</strong>
+                        <p>累计打卡天数</p>
+                    </article>
+                    <article>
+                        <strong th:text="${stats.currentStreakDays}">0</strong>
+                        <p>当前连续打卡</p>
+                    </article>
+                    <article>
+                        <strong th:text="${stats.currentMonthCount}">0</strong>
+                        <p>本月打卡次数</p>
+                    </article>
+                </div>
+                <div class="note-panel">
+                    <p>现在的记录支持补卡、编辑和日期详情页。列表负责浏览，月历负责回看，日期详情负责聚焦某一天。</p>
+                </div>
+            </aside>
+        </section>
+
+        <section class="pager-bar reveal" th:if="${pageData.pages > 1}">
+            <a class="ghost-btn small-btn" th:if="${pageData.current > 1}" th:href="@{'/checkin?page=' + ${pageData.current - 1}}">上一页</a>
+            <span class="status-pill" th:text="|第 ${pageData.current} / ${pageData.pages} 页|">第 1 / 1 页</span>
+            <a class="ghost-btn small-btn" th:if="${pageData.current < pageData.pages}" th:href="@{'/checkin?page=' + ${pageData.current + 1}}">下一页</a>
+        </section>
+    </main>
+</div>
 </body>
 </html>

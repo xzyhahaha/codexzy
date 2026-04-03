@@ -1,40 +1,92 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新建打卡 - codexzy</title>
+    <title th:text="${formTitle} + ' - codexzy'">新建打卡 - codexzy</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="app-body">
-<header class="topbar">
-    <div>
-        <h1>新建打卡</h1>
-        <p>记录今天完成的事情、推进的内容和遇到的问题</p>
-    </div>
-    <nav class="nav-actions">
-        <a th:href="@{/checkin}">返回列表</a>
-    </nav>
-</header>
+<body class="site-body">
+<div class="site-shell">
+    <header class="site-masthead reveal">
+        <div class="brand-block">
+            <a class="brand-mark" th:href="@{/}">CZ</a>
+            <div class="brand-copy">
+                <span class="section-tag">Check-In Editor</span>
+                <h1 th:text="${formTitle}">新建打卡</h1>
+                <p th:text="${formSubtitle}">支持补卡，默认日期是今天。</p>
+            </div>
+        </div>
+        <nav class="header-actions">
+            <a class="ghost-btn" th:href="@{/checkin}">返回列表</a>
+            <a class="ghost-btn" th:href="@{/checkin/calendar}">查看月历</a>
+        </nav>
+    </header>
 
-<main class="page-grid">
-    <section class="panel">
-        <form th:action="@{/checkin}" th:object="${formDTO}" method="post" class="form-grid">
-            <label>
-                <span>标题</span>
-                <input type="text" th:field="*{title}" placeholder="例如：完成今日算法练习">
-                <small class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></small>
-            </label>
+    <main class="page-stack">
+        <section class="content-grid reveal">
+            <article class="section-card main-column">
+                <div class="section-head">
+                    <div>
+                        <span class="section-tag" th:text="${isEdit} ? 'Edit Mode' : 'Create Mode'">Create Mode</span>
+                        <h3 th:text="${isEdit} ? '修改已有打卡内容' : '写下一条新的打卡记录'">写下一条新的打卡记录</h3>
+                    </div>
+                    <span class="status-pill">默认日期为今天，可手动补卡</span>
+                </div>
 
-            <label>
-                <span>内容</span>
-                <textarea th:field="*{content}" rows="8" placeholder="记录今天做了什么、遇到了什么问题"></textarea>
-                <small class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></small>
-            </label>
+                <form th:action="${formAction}" th:object="${formDTO}" method="post" class="form-stack">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 
-            <button type="submit" class="primary-btn">保存打卡</button>
-        </form>
-    </section>
-</main>
+                    <label>
+                        <span>标题</span>
+                        <input type="text" th:field="*{title}" placeholder="例如：完成接口联调 / 看完两章算法题">
+                        <small class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></small>
+                    </label>
+
+                    <label>
+                        <span>打卡日期</span>
+                        <input type="date" th:field="*{checkDate}" th:attr="max=${maxDate}">
+                        <small class="field-hint">只能选择今天及以前的日期。</small>
+                        <small class="field-error" th:if="${#fields.hasErrors('checkDate')}" th:errors="*{checkDate}"></small>
+                    </label>
+
+                    <label>
+                        <span>内容</span>
+                        <textarea th:field="*{content}" rows="9" placeholder="写下今天完成了什么、推进到了哪一步、遇到了什么问题以及怎么处理。"></textarea>
+                        <small class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></small>
+                    </label>
+
+                    <div class="form-actions-row">
+                        <button type="submit" class="solid-btn" th:text="${submitLabel}">保存打卡</button>
+                        <a class="inline-link" th:href="@{/checkin}">返回列表</a>
+                    </div>
+                </form>
+            </article>
+
+            <aside class="section-card sticky-card side-tone">
+                <div class="section-head">
+                    <div>
+                        <span class="section-tag">Writing Tips</span>
+                        <h3>怎么写会更有回看价值</h3>
+                    </div>
+                </div>
+                <div class="bullet-grid">
+                    <article>
+                        <strong>标题写结果</strong>
+                        <p>例如“完成接口联调”比“今天继续开发”更容易在后面快速扫过去。</p>
+                    </article>
+                    <article>
+                        <strong>内容写过程</strong>
+                        <p>把关键进展、阻塞点和决策写清楚，后面翻记录时会省很多时间。</p>
+                    </article>
+                    <article>
+                        <strong>补卡写原因</strong>
+                        <p>如果是补前几天的内容，建议说明当时为什么没有及时记录。</p>
+                    </article>
+                </div>
+            </aside>
+        </section>
+    </main>
+</div>
 </body>
 </html>

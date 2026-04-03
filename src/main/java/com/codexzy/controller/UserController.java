@@ -56,7 +56,7 @@ public class UserController {
 
         User currentUser = userService.getByUsername(authentication.getName());
         userService.updateProfile(currentUser.getId(), profileDTO);
-        redirectAttributes.addFlashAttribute("successMessage", "个人信息已更新");
+        redirectAttributes.addFlashAttribute("successMessage", "资料已更新");
         return "redirect:/user/profile";
     }
 

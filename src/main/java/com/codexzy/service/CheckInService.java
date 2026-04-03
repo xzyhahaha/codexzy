@@ -6,6 +6,7 @@ import com.codexzy.dto.CheckInFormDTO;
 import com.codexzy.dto.CheckInStatDTO;
 import com.codexzy.entity.CheckIn;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface CheckInService {
@@ -14,7 +15,13 @@ public interface CheckInService {
 
     IPage<CheckIn> getPage(Long userId, long current, long size);
 
+    CheckIn getById(Long userId, Long checkInId);
+
+    List<CheckIn> listByDate(Long userId, LocalDate date);
+
     void create(Long userId, CheckInFormDTO formDTO);
+
+    void update(Long userId, Long checkInId, CheckInFormDTO formDTO);
 
     void delete(Long userId, Long checkInId);
 

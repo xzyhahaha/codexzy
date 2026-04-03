@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -6,57 +6,159 @@
     <title>首页 - codexzy</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="app-body">
-<header class="topbar">
-    <div>
-        <h1>codexzy</h1>
-        <p th:text="'你好，' + ${currentUser.nickname} + '。今天也继续保持节奏。'"></p>
-    </div>
-    <nav class="nav-actions">
-        <a th:href="@{/checkin}">打卡</a>
-        <a th:href="@{/memo}">备忘录</a>
-        <a th:href="@{/user/profile}">个人设置</a>
-        <form th:action="@{/logout}" method="post">
-            <button type="submit" class="link-btn">退出</button>
-        </form>
-    </nav>
-</header>
+<body class="site-body">
+<div class="site-shell">
+    <header class="site-masthead reveal">
+        <div class="brand-block">
+            <a class="brand-mark" th:href="@{/}">CZ</a>
+            <div class="brand-copy">
+                <span class="section-tag">个人工作台</span>
+                <h1>codexzy</h1>
+                <p th:text="${todayLabel}">2026年4月2日 星期四</p>
+            </div>
+        </div>
+        <nav class="header-actions">
+            <a class="ghost-btn" th:href="@{/checkin}">打卡档案</a>
+            <a class="ghost-btn" th:href="@{/memo}">备忘资料库</a>
+            <a class="ghost-btn" th:href="@{/user/profile}">个人设置</a>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="text-btn">退出登录</button>
+            </form>
+        </nav>
+    </header>
 
-<main class="dashboard">
-    <section class="hero-panel">
-        <h2>你的记录工作台</h2>
-        <p>这里集中展示打卡进度、资料数量和常用入口，适合作为日常使用的默认首页。</p>
-    </section>
+    <main class="page-stack">
+        <section class="hero-banner reveal">
+            <div class="hero-copy">
+                <span class="section-tag">Daily System</span>
+                <h2>
+                    <span th:text="${#strings.isEmpty(currentUser.nickname) ? currentUser.username : currentUser.nickname}">用户</span>
+                    <br>
+                    把今天做成一页以后还能回看的记录。
+                </h2>
+                <p>这不是一个普通的表单页集合，而是一套围绕“记录、整理、复盘”设计的个人面板。你可以把每天的动作沉淀下来，再把相关文件和资料放进同一套节奏里。</p>
+                <div class="hero-actions">
+                    <a class="solid-btn" th:href="@{/checkin/form}">新建今日打卡</a>
+                    <a class="ghost-btn" th:href="@{/checkin/calendar}">查看月历视图</a>
+                </div>
+            </div>
+            <div class="hero-panel-grid">
+                <article class="insight-card accent-panel">
+                    <span class="meta-note">连续节奏</span>
+                    <strong th:text="|${stats.currentStreakDays} 天|">0 天</strong>
+                    <p>保持连续记录时，月历和首页都会更有参考价值。</p>
+                </article>
+                <article class="insight-card">
+                    <span class="meta-note">本月记录</span>
+                    <strong th:text="${stats.currentMonthCount}">0</strong>
+                    <p>用数量看节奏，用内容看质量。</p>
+                </article>
+                <article class="insight-card dark-panel">
+                    <span class="meta-note">资料库存</span>
+                    <strong th:text="${memoFileCount}">0</strong>
+                    <p th:text="|已归档 ${memoCategoryCount} 个分类|">已归档 0 个分类</p>
+                </article>
+            </div>
+        </section>
 
-    <section class="stats-grid">
-        <article class="stat-card">
-            <span>总打卡天数</span>
-            <strong th:text="${stats.totalCheckInDays}">0</strong>
-        </article>
-        <article class="stat-card">
-            <span>当前连续打卡</span>
-            <strong th:text="${stats.currentStreakDays}">0</strong>
-        </article>
-        <article class="stat-card">
-            <span>本月打卡次数</span>
-            <strong th:text="${stats.currentMonthCount}">0</strong>
-        </article>
-        <article class="stat-card">
-            <span>备忘录文件数</span>
-            <strong th:text="${memoFileCount}">0</strong>
-        </article>
-    </section>
+        <section class="metric-grid reveal">
+            <article class="metric-card">
+                <span class="meta-note">累计打卡天数</span>
+                <strong class="metric-number" th:text="${stats.totalCheckInDays}">0</strong>
+            </article>
+            <article class="metric-card tone-warm">
+                <span class="meta-note">当前连续打卡</span>
+                <strong class="metric-number" th:text="${stats.currentStreakDays}">0</strong>
+            </article>
+            <article class="metric-card tone-ink">
+                <span class="meta-note">本月完成记录</span>
+                <strong class="metric-number" th:text="${stats.currentMonthCount}">0</strong>
+            </article>
+            <article class="metric-card tone-soft">
+                <span class="meta-note">备忘文件数</span>
+                <strong class="metric-number" th:text="${memoFileCount}">0</strong>
+            </article>
+        </section>
 
-    <section class="quick-links">
-        <a class="feature-card" th:href="@{/checkin}">
-            <h3>打卡模块</h3>
-            <p>支持新增、列表、删除和月历查看，适合每天沉淀学习或工作记录。</p>
-        </a>
-        <a class="feature-card" th:href="@{/memo}">
-            <h3>备忘录模块</h3>
-            <p>支持分类、上传、下载和删除文件，用来整理资料、证书和项目附件。</p>
-        </a>
-    </section>
-</main>
+        <section class="content-grid reveal">
+            <article class="section-card">
+                <div class="section-head">
+                    <div>
+                        <span class="section-tag">最近打卡</span>
+                        <h3>从最新进展回看你的当下节奏</h3>
+                    </div>
+                    <a class="inline-link" th:href="@{/checkin}">查看全部</a>
+                </div>
+
+                <div class="empty-panel" th:if="${recentCheckIns.isEmpty()}">
+                    <h4>还没有任何打卡记录</h4>
+                    <p>从今天开始写第一条。月历、统计和回顾区会随着记录一起长出来。</p>
+                    <a class="solid-btn" th:href="@{/checkin/form}">马上新建</a>
+                </div>
+
+                <div class="entry-list" th:if="${!recentCheckIns.isEmpty()}">
+                    <article class="entry-card compact-card" th:each="item : ${recentCheckIns}">
+                        <div class="entry-stamp">
+                            <span th:text="${#temporals.format(item.checkDate, 'MM-dd')}">04-02</span>
+                            <small th:text="${#temporals.format(item.checkDate, 'E')}">周四</small>
+                        </div>
+                        <div class="entry-body">
+                            <div class="entry-head">
+                                <h4 th:text="${item.title}">标题</h4>
+                                <a class="inline-link" th:href="@{'/checkin/' + ${item.id} + '/edit'}">编辑</a>
+                            </div>
+                            <p th:text="${#strings.isEmpty(item.content) ? '这条记录没有填写详细内容。' : item.content}">内容</p>
+                        </div>
+                    </article>
+                </div>
+            </article>
+
+            <article class="section-card side-tone">
+                <div class="section-head">
+                    <div>
+                        <span class="section-tag">工作台结构</span>
+                        <h3>这一版的使用方式很直接</h3>
+                    </div>
+                </div>
+                <div class="bullet-grid">
+                    <article>
+                        <strong>先记录</strong>
+                        <p>把每天最关键的动作记到打卡里，哪怕只是一条可回看的摘要。</p>
+                    </article>
+                    <article>
+                        <strong>再整理</strong>
+                        <p>把项目文档、图片、证书、简历和零散资料拖进备忘录，后面统一归类。</p>
+                    </article>
+                    <article>
+                        <strong>最后回看</strong>
+                        <p>通过月历和日期详情看某一天做了什么，而不是只看一串列表。</p>
+                    </article>
+                </div>
+            </article>
+        </section>
+
+        <section class="shortcut-grid reveal">
+            <a class="shortcut-card" th:href="@{/checkin}">
+                <span class="section-tag">Check-In</span>
+                <h3>打卡档案</h3>
+                <p>列表、补卡、编辑、月历、日期详情已经串成一体。</p>
+                <span class="inline-link">进入打卡模块</span>
+            </a>
+            <a class="shortcut-card warm-card" th:href="@{/memo}">
+                <span class="section-tag">Memo</span>
+                <h3>备忘资料库</h3>
+                <p>支持拖拽上传、粘贴上传、下载和删除都在同一页完成。</p>
+                <span class="inline-link">进入资料库</span>
+            </a>
+            <a class="shortcut-card dark-card" th:href="@{/user/profile}">
+                <span class="section-tag light-tag">Profile</span>
+                <h3>个人设置</h3>
+                <p>修改昵称、邮箱和密码，保持账号信息干净可用。</p>
+                <span class="inline-link light-link">打开设置</span>
+            </a>
+        </section>
+    </main>
+</div>
 </body>
 </html>

@@ -7,10 +7,10 @@ import lombok.Data;
 @Data
 public class PasswordUpdateDTO {
 
-    @NotBlank(message = "旧密码不能为空")
+    @NotBlank(message = "请输入当前密码")
     private String oldPassword;
 
-    @NotBlank(message = "新密码不能为空")
-    @Size(min = 6, max = 32, message = "新密码长度需在 6 到 32 个字符之间")
+    @NotBlank(message = "请输入新密码")
+    @Size(min = 6, max = 64, message = "新密码长度至少 6 位")
     private String newPassword;
 }
