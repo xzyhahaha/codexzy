@@ -2,7 +2,9 @@ package com.codexzy.controller;
 
 import com.codexzy.dto.PasswordUpdateDTO;
 import com.codexzy.dto.UserProfileUpdateDTO;
+import com.codexzy.entity.BusinessAccount;
 import com.codexzy.entity.User;
+import com.codexzy.service.BusinessAccountService;
 import com.codexzy.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,9 +26,13 @@ public class UserController {
     @Resource
     private UserService userService;
 
+    @Resource
+    private BusinessAccountService businessAccountService;
+
     @GetMapping("/user/profile")
     public String profile(Authentication authentication, Model model) {
         User currentUser = userService.getByUsername(authentication.getName());
+        BusinessAccount businessAccount = businessAccountService.getOrCreateByUserId(currentUser.getId());
 
         if (!model.containsAttribute("profileDTO")) {
             UserProfileUpdateDTO profileDTO = new UserProfileUpdateDTO();
@@ -40,6 +46,7 @@ public class UserController {
         }
 
         model.addAttribute("currentUser", currentUser);
+        model.addAttribute("businessAccount", businessAccount);
         return "user/profile";
     }
 

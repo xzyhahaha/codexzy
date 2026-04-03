@@ -1,0 +1,9 @@
+package com.codexzy.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.codexzy.entity.BusinessRecord;
+import org.apache.ibatis.annotations.Mapper;
+
+@Mapper
+public interface BusinessRecordMapper extends BaseMapper<BusinessRecord> {
+}

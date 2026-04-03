@@ -60,31 +60,35 @@
                 </div>
             </article>
 
-            <aside class="section-card sticky-card side-tone">
-                <div class="section-head">
-                    <div>
+            <details class="section-card collapsible-card side-tone sticky-card reveal">
+                <summary>
+                    <div class="collapsible-summary-copy">
                         <span class="section-tag">Snapshot</span>
                         <h3>这一天在整个月里的位置</h3>
+                        <p>当天记录数、连续打卡和月内次数需要时再展开查看。</p>
+                    </div>
+                    <span class="summary-hint">展开概览</span>
+                </summary>
+                <div class="collapsible-body">
+                    <div class="bullet-grid">
+                        <article>
+                            <strong th:text="${records.size()}">0</strong>
+                            <p>当天记录数</p>
+                        </article>
+                        <article>
+                            <strong th:text="${stats.currentStreakDays}">0</strong>
+                            <p>当前连续打卡</p>
+                        </article>
+                        <article>
+                            <strong th:text="${stats.currentMonthCount}">0</strong>
+                            <p>本月打卡次数</p>
+                        </article>
+                    </div>
+                    <div class="note-panel">
+                        <p>这里负责聚焦“某一天”。如果你想看全局节奏，用月历；如果想快速浏览所有内容，用打卡列表。</p>
                     </div>
                 </div>
-                <div class="bullet-grid">
-                    <article>
-                        <strong th:text="${records.size()}">0</strong>
-                        <p>当天记录数</p>
-                    </article>
-                    <article>
-                        <strong th:text="${stats.currentStreakDays}">0</strong>
-                        <p>当前连续打卡</p>
-                    </article>
-                    <article>
-                        <strong th:text="${stats.currentMonthCount}">0</strong>
-                        <p>本月打卡次数</p>
-                    </article>
-                </div>
-                <div class="note-panel">
-                    <p>这里负责聚焦“某一天”。如果你想看全局节奏，用月历；如果想快速浏览所有内容，用打卡列表。</p>
-                </div>
-            </aside>
+            </details>
         </section>
     </main>
 </div>

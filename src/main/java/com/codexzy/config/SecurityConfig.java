@@ -17,17 +17,18 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
-                                                   UserDetailsService userDetailsService) throws Exception {
+                                                   UserDetailsService userDetailsService,
+                                                   MobileAwareAuthenticationSuccessHandler authenticationSuccessHandler) throws Exception {
         http
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/uploads/**")
+                        .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/uploads/**", "/.well-known/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true)
+                        .successHandler(authenticationSuccessHandler)
                         .failureUrl("/login?error")
                         .permitAll()
                 )
@@ -64,5 +65,10 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public MobileAwareAuthenticationSuccessHandler authenticationSuccessHandler() {
+        return new MobileAwareAuthenticationSuccessHandler();
     }
 }

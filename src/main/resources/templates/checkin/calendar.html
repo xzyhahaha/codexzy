@@ -62,33 +62,37 @@
                 </div>
             </article>
 
-            <aside class="section-card sticky-card side-tone">
-                <div class="section-head">
-                    <div>
+            <details class="section-card collapsible-card side-tone sticky-card reveal">
+                <summary>
+                    <div class="collapsible-summary-copy">
                         <span class="section-tag">Legend</span>
                         <h3>怎么看这张月历</h3>
+                        <p>颜色含义和打卡统计都在这里，需要时再展开查看。</p>
+                    </div>
+                    <span class="summary-hint">展开说明</span>
+                </summary>
+                <div class="collapsible-body">
+                    <div class="legend-list">
+                        <div class="legend-item"><span class="legend-swatch active"></span><p>高亮日期表示当天存在打卡记录。</p></div>
+                        <div class="legend-item"><span class="legend-swatch today"></span><p>描边日期表示今天。</p></div>
+                        <div class="legend-item"><span class="legend-swatch muted"></span><p>浅色日期是补齐月历结构的前后月份。</p></div>
+                    </div>
+                    <div class="bullet-grid">
+                        <article>
+                            <strong th:text="${stats.totalCheckInDays}">0</strong>
+                            <p>累计打卡天数</p>
+                        </article>
+                        <article>
+                            <strong th:text="${stats.currentStreakDays}">0</strong>
+                            <p>当前连续打卡</p>
+                        </article>
+                        <article>
+                            <strong th:text="${stats.currentMonthCount}">0</strong>
+                            <p>本月打卡次数</p>
+                        </article>
                     </div>
                 </div>
-                <div class="legend-list">
-                    <div class="legend-item"><span class="legend-swatch active"></span><p>高亮日期表示当天存在打卡记录。</p></div>
-                    <div class="legend-item"><span class="legend-swatch today"></span><p>描边日期表示今天。</p></div>
-                    <div class="legend-item"><span class="legend-swatch muted"></span><p>浅色日期是补齐月历结构的前后月份。</p></div>
-                </div>
-                <div class="bullet-grid">
-                    <article>
-                        <strong th:text="${stats.totalCheckInDays}">0</strong>
-                        <p>累计打卡天数</p>
-                    </article>
-                    <article>
-                        <strong th:text="${stats.currentStreakDays}">0</strong>
-                        <p>当前连续打卡</p>
-                    </article>
-                    <article>
-                        <strong th:text="${stats.currentMonthCount}">0</strong>
-                        <p>本月打卡次数</p>
-                    </article>
-                </div>
-            </aside>
+            </details>
         </section>
     </main>
 </div>

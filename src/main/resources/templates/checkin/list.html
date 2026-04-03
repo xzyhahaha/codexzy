@@ -71,31 +71,35 @@
                 </div>
             </article>
 
-            <aside class="section-card sticky-card side-tone">
-                <div class="section-head">
-                    <div>
+            <details class="section-card collapsible-card side-tone sticky-card reveal">
+                <summary>
+                    <div class="collapsible-summary-copy">
                         <span class="section-tag">Overview</span>
                         <h3>记录节奏</h3>
+                        <p>累计天数、连续打卡和本月次数需要时再展开看。</p>
+                    </div>
+                    <span class="summary-hint">展开概览</span>
+                </summary>
+                <div class="collapsible-body">
+                    <div class="bullet-grid">
+                        <article>
+                            <strong th:text="${stats.totalCheckInDays}">0</strong>
+                            <p>累计打卡天数</p>
+                        </article>
+                        <article>
+                            <strong th:text="${stats.currentStreakDays}">0</strong>
+                            <p>当前连续打卡</p>
+                        </article>
+                        <article>
+                            <strong th:text="${stats.currentMonthCount}">0</strong>
+                            <p>本月打卡次数</p>
+                        </article>
+                    </div>
+                    <div class="note-panel">
+                        <p>现在的记录支持补卡、编辑和日期详情页。列表负责浏览，月历负责回看，日期详情负责聚焦某一天。</p>
                     </div>
                 </div>
-                <div class="bullet-grid">
-                    <article>
-                        <strong th:text="${stats.totalCheckInDays}">0</strong>
-                        <p>累计打卡天数</p>
-                    </article>
-                    <article>
-                        <strong th:text="${stats.currentStreakDays}">0</strong>
-                        <p>当前连续打卡</p>
-                    </article>
-                    <article>
-                        <strong th:text="${stats.currentMonthCount}">0</strong>
-                        <p>本月打卡次数</p>
-                    </article>
-                </div>
-                <div class="note-panel">
-                    <p>现在的记录支持补卡、编辑和日期详情页。列表负责浏览，月历负责回看，日期详情负责聚焦某一天。</p>
-                </div>
-            </aside>
+            </details>
         </section>
 
         <section class="pager-bar reveal" th:if="${pageData.pages > 1}">

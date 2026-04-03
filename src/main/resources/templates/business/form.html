@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>经营录入 - codexzy</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="site-body">
+<div class="site-shell">
+    <header class="site-masthead reveal">
+        <div class="brand-block">
+            <a class="brand-mark" th:href="@{/business}">BZ</a>
+            <div class="brand-copy">
+                <span class="section-tag">经营录入</span>
+                <h1 th:text="${isInbound ? '商品入库' : '报单'}">经营录入</h1>
+                <p class="code-copy-row compact">
+                    <span class="code-copy-label">个人报码：</span>
+                    <strong class="code-inline-value" th:text="${businessAccount.reportCode}">CZ00000000</strong>
+                    <button type="button"
+                            class="ghost-btn small-btn code-copy-btn"
+                            th:attr="data-copy-text=${businessAccount.reportCode},data-copy-label='复制个人报码',data-copied-label='已复制',data-copy-error-label='复制失败'"
+                            aria-label="复制个人报码">复制</button>
+                </p>
+            </div>
+        </div>
+        <nav class="header-actions">
+            <a class="ghost-btn" th:href="@{/business}">返回经营后台</a>
+            <a class="ghost-btn" th:href="@{/}">返回首页</a>
+            <form th:action="@{/logout}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <button type="submit" class="text-btn">退出登录</button>
+            </form>
+        </nav>
+    </header>
+
+    <main class="content-grid reveal">
+        <div class="flash-stack" style="grid-column: 1 / -1;">
+            <div class="flash-banner success" th:if="${successMessage}" th:text="${successMessage}"></div>
+            <div class="flash-banner error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+        </div>
+
+        <section class="section-card">
+            <div class="section-head">
+                <div>
+                    <span class="section-tag">录入表单</span>
+                    <h3 th:text="${formTitle}">填写经营记录</h3>
+                    <p class="field-hint" th:text="${formSubtitle}">经营说明</p>
+                </div>
+            </div>
+
+            <form class="form-stack business-form" th:action="@{${formAction}}" method="post" th:object="${formDTO}"
+                  th:attr="data-own-code=${businessAccount.reportCode},data-edit-mode=${isEdit}">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
+                <div class="form-grid">
+                    <label class="form-span-2">
+                        <span>记录类型</span>
+                        <div th:if="${!isEdit}">
+                            <select th:field="*{recordType}">
+                                <option value="REPORT">报单</option>
+                                <option value="INBOUND">商品入库</option>
+                            </select>
+                            <small class="field-hint">报单会进入对方后台，入库会进入你自己的后台。</small>
+                            <div class="field-error" th:if="${#fields.hasErrors('recordType')}" th:errors="*{recordType}">类型错误</div>
+                        </div>
+                        <div th:if="${isEdit}" class="readonly-card">
+                            <strong th:text="${recordTypeLabel}">报单</strong>
+                            <p class="field-hint">编辑时记录类型保持原状态，不会改变所属后台。</p>
+                            <input type="hidden" th:field="*{recordType}">
+                        </div>
+                    </label>
+
+                    <label>
+                        <span>记录状态</span>
+                        <select th:field="*{recordStatus}">
+                            <option value="UNINVENTORIED">未入库</option>
+                            <option value="INVENTORIED_PENDING_SETTLEMENT">已入库待结算</option>
+                            <option value="SETTLED">已结算</option>
+                        </select>
+                        <small class="field-hint" th:text="${isInbound ? '这个状态会同步出现在后台列表和报单详情页。' : '报单单据提交后，状态只能由上家修改。'}">这个状态会同步出现在后台列表和报单详情页。</small>
+                        <div class="field-error" th:if="${#fields.hasErrors('recordStatus')}" th:errors="*{recordStatus}">状态错误</div>
+                    </label>
+
+                    <label>
+                        <span>目标报单码</span>
+                        <input type="text" th:field="*{targetReportCode}" th:readonly="${isInbound || isEdit}" placeholder="输入对方的报单码">
+                        <small class="field-hint" th:text="${isEdit ? '编辑时目标报码保持不变。' : (isInbound ? '入库模式会自动归到你自己的个人报码下。' : '把对方的报码填在这里，提交后会进入对方后台。')}">提示</small>
+                        <div class="field-error" th:if="${#fields.hasErrors('targetReportCode')}" th:errors="*{targetReportCode}">报码错误</div>
+                    </label>
+
+                    <label>
+                        <span>发生时间</span>
+                        <input type="datetime-local" th:field="*{occurredAt}">
+                        <div class="field-error" th:if="${#fields.hasErrors('occurredAt')}" th:errors="*{occurredAt}">时间错误</div>
+                    </label>
+
+                    <label>
+                        <span>产品名称</span>
+                        <input type="text" th:field="*{productName}" placeholder="输入产品名称">
+                        <div class="field-error" th:if="${#fields.hasErrors('productName')}" th:errors="*{productName}">产品错误</div>
+                    </label>
+
+                    <label>
+                        <span>数量</span>
+                        <input type="number" th:field="*{quantity}" min="1" step="1" placeholder="0">
+                        <div class="field-error" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}">数量错误</div>
+                    </label>
+
+                    <label>
+                        <span>成本</span>
+                        <input type="number" th:field="*{costAmount}" min="0" step="0.01" placeholder="0.00">
+                        <div class="field-error" th:if="${#fields.hasErrors('costAmount')}" th:errors="*{costAmount}">成本错误</div>
+                    </label>
+
+                    <label>
+                        <span>固返</span>
+                        <input type="number" th:field="*{fixedReturnAmount}" min="0" step="0.01" placeholder="0.00">
+                        <div class="field-error" th:if="${#fields.hasErrors('fixedReturnAmount')}" th:errors="*{fixedReturnAmount}">固返错误</div>
+                    </label>
+
+                    <label>
+                        <span>利润</span>
+                        <input type="number" th:field="*{profitAmount}" min="0" step="0.01" placeholder="0.00">
+                        <div class="field-error" th:if="${#fields.hasErrors('profitAmount')}" th:errors="*{profitAmount}">利润错误</div>
+                    </label>
+
+                    <label>
+                        <span>卖出金额</span>
+                        <input type="number" th:field="*{soldAmount}" min="0" step="0.01" placeholder="0.00">
+                        <div class="field-error" th:if="${#fields.hasErrors('soldAmount')}" th:errors="*{soldAmount}">卖出金额错误</div>
+                    </label>
+
+                    <label class="form-span-2">
+                        <span>备注</span>
+                        <textarea th:field="*{remark}" placeholder="补充一些经营说明、客户信息或额外备注"></textarea>
+                        <div class="field-error" th:if="${#fields.hasErrors('remark')}" th:errors="*{remark}">备注错误</div>
+                    </label>
+                </div>
+
+                <div class="form-actions-row">
+                    <button type="submit" class="solid-btn" th:text="${submitLabel}">保存记录</button>
+                    <a class="ghost-btn" th:href="@{/business}">取消返回</a>
+                </div>
+            </form>
+        </section>
+
+        <details class="section-card collapsible-card side-tone sticky-card reveal">
+            <summary>
+                <div class="collapsible-summary-copy">
+                    <span class="section-tag">填写提示</span>
+                    <h3>这页只负责经营记录，不影响打卡</h3>
+                    <p>个人报码已经在顶部给出，具体模式和汇总口径需要时再展开。</p>
+                </div>
+                <span class="summary-hint">展开提示</span>
+            </summary>
+            <div class="collapsible-body">
+                <div class="bullet-grid compact-bullets light-grid">
+                    <article>
+                        <strong>报单模式</strong>
+                        <p>把“记录类型”选成报单，再填对方报码。</p>
+                    </article>
+                    <article>
+                        <strong>入库模式</strong>
+                        <p>把“记录类型”选成入库，系统会默认归到你自己的后台。</p>
+                    </article>
+                    <article>
+                        <strong>数据范围</strong>
+                        <p>时间、成本、固返、利润、卖出和数量都会在后台汇总。</p>
+                    </article>
+                </div>
+
+                <div class="note-panel">
+                    <p>如果你后面要加库存扣减、对账、结算或导出，我可以继续接着做，不用重写现有数据结构。</p>
+                </div>
+            </div>
+        </details>
+    </main>
+</div>
+<script th:src="@{/js/business-form.js}"></script>
+<script th:src="@{/js/code-copy.js}"></script>
+</body>
+</html>
