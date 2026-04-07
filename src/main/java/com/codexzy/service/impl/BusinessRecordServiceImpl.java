@@ -1,6 +1,8 @@
 package com.codexzy.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.codexzy.dto.BusinessRecordFormDTO;
 import com.codexzy.dto.BusinessRecordSummaryDTO;
 import com.codexzy.dto.BusinessRecordViewDTO;
@@ -12,6 +14,7 @@ import com.codexzy.mapper.BusinessRecordMapper;
 import com.codexzy.service.BusinessAccountService;
 import com.codexzy.service.BusinessRecordService;
 import com.codexzy.service.BusinessReporterNoteService;
+import com.codexzy.service.BusinessReportTargetService;
 import com.codexzy.service.UserService;
 import com.codexzy.util.BusinessRecordStatusUtil;
 import jakarta.annotation.Resource;
@@ -37,6 +40,7 @@ public class BusinessRecordServiceImpl implements BusinessRecordService {
     private static final String TYPE_INBOUND = "INBOUND";
     private static final String LABEL_REPORT = "报单";
     private static final String LABEL_INBOUND = "入库";
+    private static final long DEFAULT_PAGE_SIZE = 10L;
 
     @Resource
     private BusinessRecordMapper businessRecordMapper;
@@ -49,6 +53,9 @@ public class BusinessRecordServiceImpl implements BusinessRecordService {
 
     @Resource
     private BusinessReporterNoteService businessReporterNoteService;
+
+    @Resource
+    private BusinessReportTargetService businessReportTargetService;
 
     @Override
     @Transactional
@@ -70,7 +77,6 @@ public class BusinessRecordServiceImpl implements BusinessRecordService {
         record.setOwnerUserId(targetAccount.getUserId());
         record.setReporterUserId(currentUserId);
         record.setRecordType(recordType);
-        // 报单单据的状态由上家后台管理，创建时不接受报单人自行指定
         record.setRecordStatus(TYPE_REPORT.equals(recordType)
                 ? BusinessRecordStatusUtil.defaultStatus(recordType)
                 : BusinessRecordStatusUtil.normalizeStatus(formDTO.getRecordStatus(), recordType));
@@ -83,6 +89,11 @@ public class BusinessRecordServiceImpl implements BusinessRecordService {
         record.setSoldAmount(normalizeMoney(formDTO.getSoldAmount()));
         record.setRemark(normalizeRemark(formDTO.getRemark()));
         businessRecordMapper.insert(record);
+        if (TYPE_REPORT.equals(recordType) && Boolean.TRUE.equals(formDTO.getBindTarget())) {
+            businessReportTargetService.bindTarget(currentUserId, targetAccount.getUserId());
+        } else if (TYPE_REPORT.equals(recordType)) {
+            businessReportTargetService.touchTarget(currentUserId, targetAccount.getUserId());
+        }
         return record;
     }
 
@@ -122,6 +133,16 @@ public class BusinessRecordServiceImpl implements BusinessRecordService {
     public BusinessRecordSummaryDTO getSummary(Long ownerUserId, LocalDate startDate, LocalDate endDate, String scope) {
         List<BusinessRecord> records = selectRecords(ownerUserId, startDate, endDate, scope, null);
         return buildSummary(records);
+    }
+
+    @Override
+    public IPage<BusinessRecordViewDTO> getRecordPage(Long ownerUserId,
+                                                      LocalDate startDate,
+                                                      LocalDate endDate,
+                                                      String scope,
+                                                      long current,
+                                                      long size) {
+        return buildRecordPage(ownerUserId, startDate, endDate, scope, null, current, size);
     }
 
     @Override
@@ -172,6 +193,17 @@ public class BusinessRecordServiceImpl implements BusinessRecordService {
     }
 
     @Override
+    public IPage<BusinessRecordViewDTO> getReporterRecordPage(Long ownerUserId,
+                                                              Long reporterUserId,
+                                                              LocalDate startDate,
+                                                              LocalDate endDate,
+                                                              String scope,
+                                                              long current,
+                                                              long size) {
+        return buildRecordPage(ownerUserId, startDate, endDate, scope, reporterUserId, current, size);
+    }
+
+    @Override
     public List<BusinessRecordViewDTO> listRecordsByReporter(Long ownerUserId,
                                                              Long reporterUserId,
                                                              LocalDate startDate,
@@ -181,11 +213,41 @@ public class BusinessRecordServiceImpl implements BusinessRecordService {
         return buildRecordViews(records, ownerUserId);
     }
 
+    private IPage<BusinessRecordViewDTO> buildRecordPage(Long ownerUserId,
+                                                         LocalDate startDate,
+                                                         LocalDate endDate,
+                                                         String scope,
+                                                         Long reporterUserId,
+                                                         long current,
+                                                         long size) {
+        long normalizedSize = normalizePageSize(size);
+        long normalizedCurrent = Math.max(current, 1L);
+        Page<BusinessRecord> page = new Page<>(normalizedCurrent, normalizedSize);
+        IPage<BusinessRecord> recordPage = businessRecordMapper.selectPage(page,
+                buildRecordQuery(ownerUserId, startDate, endDate, scope, reporterUserId));
+        if (recordPage.getTotal() > 0 && recordPage.getPages() > 0 && normalizedCurrent > recordPage.getPages()) {
+            page = new Page<>(recordPage.getPages(), normalizedSize);
+            recordPage = businessRecordMapper.selectPage(page,
+                    buildRecordQuery(ownerUserId, startDate, endDate, scope, reporterUserId));
+        }
+        Page<BusinessRecordViewDTO> viewPage = new Page<>(recordPage.getCurrent(), recordPage.getSize(), recordPage.getTotal());
+        viewPage.setRecords(buildRecordViews(recordPage.getRecords(), ownerUserId));
+        return viewPage;
+    }
+
     private List<BusinessRecord> selectRecords(Long ownerUserId,
                                                LocalDate startDate,
                                                LocalDate endDate,
                                                String scope,
                                                Long reporterUserId) {
+        return businessRecordMapper.selectList(buildRecordQuery(ownerUserId, startDate, endDate, scope, reporterUserId));
+    }
+
+    private LambdaQueryWrapper<BusinessRecord> buildRecordQuery(Long ownerUserId,
+                                                                LocalDate startDate,
+                                                                LocalDate endDate,
+                                                                String scope,
+                                                                Long reporterUserId) {
         LambdaQueryWrapper<BusinessRecord> query = new LambdaQueryWrapper<BusinessRecord>()
                 .eq(BusinessRecord::getOwnerUserId, ownerUserId)
                 .orderByDesc(BusinessRecord::getOccurredAt)
@@ -203,7 +265,7 @@ public class BusinessRecordServiceImpl implements BusinessRecordService {
         if (reporterUserId != null) {
             query.eq(BusinessRecord::getReporterUserId, reporterUserId);
         }
-        return businessRecordMapper.selectList(query);
+        return query;
     }
 
     private BusinessRecordSummaryDTO buildSummary(List<BusinessRecord> records) {
@@ -316,6 +378,10 @@ public class BusinessRecordServiceImpl implements BusinessRecordService {
             return TYPE_INBOUND;
         }
         return TYPE_REPORT;
+    }
+
+    private long normalizePageSize(long size) {
+        return size > 0 ? size : DEFAULT_PAGE_SIZE;
     }
 
     private BigDecimal normalizeMoney(BigDecimal amount) {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -24,16 +24,6 @@
                 </p>
             </div>
         </div>
-        <nav class="header-actions">
-            <a class="ghost-btn" th:href="@{/}">首页</a>
-            <a class="ghost-btn" th:href="@{/checkin}">打卡模块</a>
-            <a class="ghost-btn" th:href="@{/memo}">资料库</a>
-            <a class="ghost-btn" th:href="@{/user/profile}">个人设置</a>
-            <form th:action="@{/logout}" method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button type="submit" class="text-btn">退出登录</button>
-            </form>
-        </nav>
     </header>
 
     <main class="page-stack">
@@ -46,6 +36,7 @@
             <div class="hero-copy">
                 <span class="section-tag">经营入口</span>
                 <h2>报单、入库</h2>
+                <p th:text="|${#temporals.format(startDate, 'MM-dd')} 至 ${#temporals.format(endDate, 'MM-dd')} · ${scope == 'ALL' ? '全部记录' : scope == 'REPORT' ? '只看报单' : '只看入库'}|">04-01 至 04-30 · 全部记录</p>
                 <div class="hero-actions">
                     <a class="solid-btn" th:href="@{/business/form(type='REPORT')}">报单</a>
                     <a class="ghost-btn" th:href="@{/business/form(type='INBOUND')}">商品入库</a>
@@ -60,277 +51,320 @@
                 <article class="insight-card">
                     <span class="meta-note">时间范围</span>
                     <strong th:text="|${#temporals.format(startDate, 'MM-dd')} 至 ${#temporals.format(endDate, 'MM-dd')}|">04-01 至 04-30</strong>
-                    <p th:text="|当前视图：${scope == 'ALL' ? '全部记录' : scope == 'REPORT' ? '报单' : '我的入库'}|">当前视图：全部记录</p>
+                    <p th:text="|当前在看：${scope == 'ALL' ? '全部记录' : scope == 'REPORT' ? '报单' : '我的入库'}|">当前在看：全部记录</p>
                 </article>
             </div>
         </section>
 
-        <section class="metric-grid reveal">
-            <article class="metric-card">
-                <span class="meta-note">记录总数</span>
-                <strong class="metric-number" th:text="${summary.recordCount}">0</strong>
-            </article>
-            <article class="metric-card tone-warm">
-                <span class="meta-note">报单记录</span>
-                <strong class="metric-number" th:text="${summary.reportCount}">0</strong>
-            </article>
-            <article class="metric-card tone-soft">
-                <span class="meta-note">入库记录</span>
-                <strong class="metric-number" th:text="${summary.inboundCount}">0</strong>
-            </article>
-            <article class="metric-card tone-ink">
-                <span class="meta-note">总数量</span>
-                <strong class="metric-number" th:text="${summary.totalQuantity}">0</strong>
-            </article>
-            <article class="metric-card">
-                <span class="meta-note">总成本</span>
-                <strong class="metric-number" th:text="|¥ ${summary.totalCostAmount}|">¥0.00</strong>
-            </article>
-            <article class="metric-card tone-warm">
-                <span class="meta-note">总卖出</span>
-                <strong class="metric-number" th:text="|¥ ${summary.totalSoldAmount}|">¥0.00</strong>
-            </article>
-        </section>
+        <nav class="business-mobile-viewbar reveal" aria-label="经营页内容切换">
+            <a class="business-mobile-viewbar__item"
+               th:classappend="${activeMobileView == 'overview'} ? ' is-active' : ''"
+               th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope=${scope}, page=${pageData.current}, view='overview')}">总览</a>
+            <a class="business-mobile-viewbar__item"
+               th:classappend="${activeMobileView == 'records'} ? ' is-active' : ''"
+               th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope=${scope}, page=${pageData.current}, view='records')}">记录</a>
+            <a class="business-mobile-viewbar__item"
+               th:classappend="${activeMobileView == 'filter'} ? ' is-active' : ''"
+               th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope=${scope}, page=${pageData.current}, view='filter')}">筛选</a>
+        </nav>
 
-        <details class="section-card collapsible-card filter-card reveal">
-            <summary>
-                <div class="collapsible-summary-copy">
-                    <span class="section-tag">筛选视图</span>
-                    <h3>按日期和类型筛选经营数据</h3>
-                    <p th:text="|当前：${#temporals.format(startDate, 'MM-dd')} 至 ${#temporals.format(endDate, 'MM-dd')} · ${scope == 'ALL' ? '全部记录' : scope == 'REPORT' ? '报单' : '我的入库'}，需要时再点开调整。|">当前：04-01 至 04-30 · 全部记录，需要时再点开调整。</p>
-                </div>
-                <span class="summary-hint">展开筛选</span>
-            </summary>
-            <div class="collapsible-body">
-                <form class="filter-form" method="get" th:action="@{/business}">
-                    <div class="filter-grid">
-                        <label>
-                            <span>开始日期</span>
-                            <input type="date" name="startDate" th:value="${startDate}">
-                        </label>
-                        <label>
-                            <span>结束日期</span>
-                            <input type="date" name="endDate" th:value="${endDate}">
-                        </label>
-                        <label>
-                            <span>记录类型</span>
-                            <select name="scope">
-                                <option value="ALL" th:selected="${scope == 'ALL'}">全部记录</option>
-                                <option value="REPORT" th:selected="${scope == 'REPORT'}">报单</option>
-                                <option value="INBOUND" th:selected="${scope == 'INBOUND'}">我的入库</option>
-                            </select>
-                        </label>
-                        <div class="filter-actions">
-                            <button type="submit" class="solid-btn wide-btn">应用筛选</button>
-                        </div>
-                    </div>
-                </form>
+        <div class="business-mobile-panel business-mobile-panel--overview reveal"
+             th:classappend="${activeMobileView == 'overview'} ? ' is-active' : ''">
+            <section class="metric-grid reveal">
+                <article class="metric-card metric-card--primary">
+                    <span class="meta-note">记录总数</span>
+                    <strong class="metric-number" th:text="${summary.recordCount}">0</strong>
+                </article>
+                <article class="metric-card metric-card--primary tone-warm">
+                    <span class="meta-note">报单记录</span>
+                    <strong class="metric-number" th:text="${summary.reportCount}">0</strong>
+                </article>
+                <article class="metric-card metric-card--primary tone-soft">
+                    <span class="meta-note">入库记录</span>
+                    <strong class="metric-number" th:text="${summary.inboundCount}">0</strong>
+                </article>
+                <article class="metric-card metric-card--primary tone-ink">
+                    <span class="meta-note">总数量</span>
+                    <strong class="metric-number" th:text="${summary.totalQuantity}">0</strong>
+                </article>
+                <article class="metric-card metric-card--secondary">
+                    <span class="meta-note">总成本</span>
+                    <strong class="metric-number" th:text="|¥ ${summary.totalCostAmount}|">¥0.00</strong>
+                </article>
+                <article class="metric-card metric-card--secondary tone-warm">
+                    <span class="meta-note">总卖出</span>
+                    <strong class="metric-number" th:text="|¥ ${summary.totalSoldAmount}|">¥0.00</strong>
+                </article>
+            </section>
 
-                <div class="scope-bar">
-                    <a class="scope-chip" th:classappend="${scope == 'ALL'} ? ' active' : ''"
-                       th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope='ALL')}">全部</a>
-                    <a class="scope-chip" th:classappend="${scope == 'REPORT'} ? ' active' : ''"
-                       th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope='REPORT')}">报单</a>
-                    <a class="scope-chip" th:classappend="${scope == 'INBOUND'} ? ' active' : ''"
-                       th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope='INBOUND')}">我的入库</a>
-                </div>
-            </div>
-        </details>
-
-        <section class="content-grid reveal">
-            <article class="section-card">
-                <div class="section-head">
-                    <div>
-                        <span class="section-tag">报单汇总</span>
-                        <h3>每个报单人都有自己的记录和汇总</h3>
-                    </div>
-                </div>
-
-                <div class="empty-panel small-empty" th:if="${reporterSummaries.isEmpty()}">
-                    <h4>当前时间范围内没有经营记录</h4>
-                    <p>先试着发一条报单，或者切换到更早的日期范围。</p>
-                </div>
-
-                <div class="reporter-grid" th:if="${!reporterSummaries.isEmpty()}">
-                    <a class="reporter-card" th:each="item : ${reporterSummaries}"
-                       th:href="@{/business/reporters/{reporterId}(reporterId=${item.reporterUserId}, startDate=${startDate}, endDate=${endDate}, scope=${scope})}">
+            <section class="content-grid reveal">
+                <article class="section-card">
+                    <div class="section-head">
                         <div>
-                            <span class="meta-note" th:text="${item.selfReporter ? '本人' : '报单人'}">报单人</span>
-                            <h4 th:text="${item.reporterDisplayName}">报单人</h4>
-                            <p th:text="|${item.recordCount} 条记录 · ${item.totalQuantity} 件|">0 条记录 · 0 件</p>
-                            <p th:text="|成本 ¥ ${item.totalCostAmount} · 卖出 ¥ ${item.totalSoldAmount}|">成本 ¥0.00 · 卖出 ¥0.00</p>
+                            <span class="section-tag">报单汇总</span>
+                            <h3>每个报单人都有自己的记录和汇总</h3>
                         </div>
-                        <strong th:text="|¥ ${item.totalProfitAmount}|">¥0.00</strong>
-                    </a>
-                </div>
-            </article>
+                    </div>
 
-            <details class="section-card collapsible-card side-tone sticky-card reveal">
+                    <div class="empty-panel small-empty" th:if="${reporterSummaries.isEmpty()}">
+                        <h4>当前时间范围内没有经营记录</h4>
+                        <p>先试着发一条报单，或者切换到更早的日期范围。</p>
+                    </div>
+
+                    <div class="reporter-grid" th:if="${!reporterSummaries.isEmpty()}">
+                        <a class="reporter-card" th:each="item : ${reporterSummaries}"
+                           th:href="@{/business/reporters/{reporterId}(reporterId=${item.reporterUserId}, startDate=${startDate}, endDate=${endDate}, scope=${scope}, view='records')}">
+                            <div>
+                                <span class="meta-note" th:text="${item.selfReporter ? '本人' : '报单人'}">报单人</span>
+                                <h4 th:text="${item.reporterDisplayName}">报单人</h4>
+                                <p th:text="|${item.recordCount} 条记录 · ${item.totalQuantity} 件|">0 条记录 · 0 件</p>
+                                <p th:text="|成本 ¥ ${item.totalCostAmount} · 卖出 ¥ ${item.totalSoldAmount}|">成本 ¥0.00 · 卖出 ¥0.00</p>
+                            </div>
+                            <strong th:text="|¥ ${item.totalProfitAmount}|">¥0.00</strong>
+                        </a>
+                    </div>
+                </article>
+
+                <details class="section-card collapsible-card side-tone sticky-card reveal">
+                    <summary>
+                        <div class="collapsible-summary-copy">
+                            <span class="section-tag">使用说明</span>
+                            <h3>个人报码、报单、入库的关系</h3>
+                            <p>默认先把主操作和汇总露出来，报码和模式说明需要时再展开。</p>
+                        </div>
+                        <span class="summary-hint">展开说明</span>
+                    </summary>
+                    <div class="collapsible-body">
+                        <div class="bullet-grid compact-bullets light-grid">
+                            <article>
+                                <strong>报单</strong>
+                                <p>选择“报单”模式，填写对方报码和本次经营数据。</p>
+                            </article>
+                            <article>
+                                <strong>商品入库</strong>
+                                <p>选择“入库”模式，记录自己补货或入库的明细。</p>
+                            </article>
+                            <article>
+                                <strong>按人汇总</strong>
+                                <p>点进任一报单人，可以单独看他的记录和统计。</p>
+                            </article>
+                        </div>
+
+                        <div class="note-panel">
+                            <p>后面如果还要加库存、结算或分账，也可以继续沿着这套经营记录往下扩。</p>
+                        </div>
+                    </div>
+                </details>
+            </section>
+        </div>
+
+        <div class="business-mobile-panel business-mobile-panel--filter reveal"
+             th:classappend="${activeMobileView == 'filter'} ? ' is-active' : ''">
+            <details class="section-card collapsible-card filter-card reveal">
                 <summary>
                     <div class="collapsible-summary-copy">
-                        <span class="section-tag">使用说明</span>
-                        <h3>个人报码、报单、入库的关系</h3>
-                        <p>默认先把主操作和汇总露出来，报码和模式说明需要时再展开。</p>
+                        <span class="section-tag">筛选条件</span>
+                        <h3>按日期和类型筛选经营数据</h3>
+                        <p th:text="|当前：${#temporals.format(startDate, 'MM-dd')} 至 ${#temporals.format(endDate, 'MM-dd')} · ${scope == 'ALL' ? '全部记录' : scope == 'REPORT' ? '报单' : '我的入库'}，需要时再点开调整。|">当前：04-01 至 04-30 · 全部记录，需要时再点开调整。</p>
                     </div>
-                    <span class="summary-hint">展开说明</span>
+                    <span class="summary-hint">调整筛选</span>
                 </summary>
                 <div class="collapsible-body">
-                    <div class="bullet-grid compact-bullets light-grid">
-                        <article>
-                            <strong>报单</strong>
-                            <p>选择“报单”模式，填写对方报码和本次经营数据。</p>
-                        </article>
-                        <article>
-                            <strong>商品入库</strong>
-                            <p>选择“入库”模式，记录自己补货或入库的明细。</p>
-                        </article>
-                        <article>
-                            <strong>按人汇总</strong>
-                            <p>点进任一报单人，可以单独看他的记录和统计。</p>
-                        </article>
-                    </div>
+                    <form class="filter-form" method="get" th:action="@{/business}">
+                        <input type="hidden" name="view" value="records">
+                        <div class="filter-grid">
+                            <label>
+                                <span>开始日期</span>
+                                <input type="date" name="startDate" th:value="${startDate}">
+                            </label>
+                            <label>
+                                <span>结束日期</span>
+                                <input type="date" name="endDate" th:value="${endDate}">
+                            </label>
+                            <label>
+                                <span>记录类型</span>
+                                <select name="scope">
+                                    <option value="ALL" th:selected="${scope == 'ALL'}">全部记录</option>
+                                    <option value="REPORT" th:selected="${scope == 'REPORT'}">报单</option>
+                                    <option value="INBOUND" th:selected="${scope == 'INBOUND'}">我的入库</option>
+                                </select>
+                            </label>
+                            <div class="filter-actions">
+                                <button type="submit" class="solid-btn wide-btn">应用筛选</button>
+                            </div>
+                        </div>
+                    </form>
 
-                    <div class="note-panel">
-                        <p>如果你后面还要加库存数量、欠款结算、利润分账，我可以直接把这个模块继续扩展，不会影响打卡模块。</p>
+                    <div class="scope-bar">
+                        <a class="scope-chip" th:classappend="${scope == 'ALL'} ? ' active' : ''"
+                           th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope='ALL', view='records')}">全部</a>
+                        <a class="scope-chip" th:classappend="${scope == 'REPORT'} ? ' active' : ''"
+                           th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope='REPORT', view='records')}">报单</a>
+                        <a class="scope-chip" th:classappend="${scope == 'INBOUND'} ? ' active' : ''"
+                           th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope='INBOUND', view='records')}">我的入库</a>
                     </div>
                 </div>
             </details>
-        </section>
+        </div>
 
-        <section class="section-card reveal">
-            <div class="section-head">
-                <div>
-                    <span class="section-tag">经营明细</span>
-                    <h3>按时间倒序排列的记录列表</h3>
+        <div class="business-mobile-panel business-mobile-panel--records reveal"
+             th:classappend="${activeMobileView == 'records'} ? ' is-active' : ''">
+            <section class="section-card reveal">
+                <div class="section-head">
+                    <div>
+                        <span class="section-tag">经营明细</span>
+                        <h3>按时间倒序排列的记录列表</h3>
+                    </div>
+                    <a class="inline-link" th:href="@{/business/form(type='REPORT')}">新增报单</a>
                 </div>
-                <a class="inline-link" th:href="@{/business/form(type='REPORT')}">新增报单</a>
-            </div>
 
-            <div class="empty-panel" th:if="${records.isEmpty()}">
-                <h4>还没有任何经营记录</h4>
-                <p>先创建一条报单或入库记录，后面这里会自动生成汇总。</p>
-                <a class="solid-btn" th:href="@{/business/form(type='REPORT')}">开始添加</a>
-            </div>
+                <div class="empty-panel" th:if="${records.isEmpty()}">
+                    <h4>还没有任何经营记录</h4>
+                    <p>先创建一条报单或入库记录，后面这里会自动生成汇总。</p>
+                    <a class="solid-btn" th:href="@{/business/form(type='REPORT')}">开始添加</a>
+                </div>
 
-            <div class="table-scroll" th:if="${!records.isEmpty()}">
-                <table class="record-table">
-                    <thead>
-                    <tr>
-                        <th>时间</th>
-                        <th class="mobile-hide">报单人</th>
-                        <th>类型</th>
-                        <th>状态</th>
-                        <th>产品</th>
-                        <th>数量</th>
-                        <th class="mobile-hide">成本</th>
-                        <th class="mobile-hide">固返</th>
-                        <th class="mobile-hide">利润</th>
-                        <th class="mobile-hide">卖出</th>
-                        <th class="mobile-hide">备注</th>
-                        <th>操作</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="item : ${records}">
-                        <td th:text="${#temporals.format(item.occurredAt, 'yyyy-MM-dd HH:mm')}">2026-04-02 12:00</td>
-                        <td class="mobile-hide">
-                            <span th:text="${item.reporterDisplayName}">张三</span>
-                            <span class="record-tag self" th:if="${item.selfReporter}">本人</span>
-                        </td>
-                        <td>
-                            <span class="record-tag"
-                                  th:classappend="${item.recordType == 'INBOUND'} ? ' inbound' : ' report'"
-                                  th:text="${item.recordTypeLabel}">报单</span>
-                        </td>
-                        <td>
-                            <span class="record-tag"
-                                  th:classappend="${item.recordStatus == 'INVENTORIED_PENDING_SETTLEMENT'} ? ' pending' : (item.recordStatus == 'SETTLED' ? ' settled' : ' uninventoried')"
-                                  th:text="${item.recordStatusLabel}">未入库</span>
-                        </td>
-                        <td>
-                            <strong th:text="${item.productName}">产品</strong>
-                            <p class="field-hint" th:text="|${item.ownerDisplayName} 后台|">后台</p>
-                        </td>
-                        <td th:text="${item.quantity}">0</td>
-                        <td class="mobile-hide" th:text="|¥ ${item.costAmount}|">¥0.00</td>
-                        <td class="mobile-hide" th:text="|¥ ${item.fixedReturnAmount}|">¥0.00</td>
-                        <td class="mobile-hide" th:text="|¥ ${item.profitAmount}|">¥0.00</td>
-                        <td class="mobile-hide" th:text="|¥ ${item.soldAmount}|">¥0.00</td>
-                        <td class="mobile-hide" th:text="${#strings.isEmpty(item.remark) ? '—' : item.remark}">备注</td>
-                        <td>
-                            <div class="row-actions">
-                                <a class="ghost-btn small-btn" th:href="@{'/business/' + ${item.id} + '/edit'}">编辑</a>
-                                <form th:action="@{'/business/' + ${item.id} + '/delete'}" method="post" onsubmit="return confirm('确定删除这条经营记录吗？');">
-                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                    <button type="submit" class="danger-btn small-btn">删除</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+                <div class="table-scroll" th:if="${!records.isEmpty()}">
+                    <table class="record-table">
+                        <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th class="mobile-hide">报单人</th>
+                            <th>类型</th>
+                            <th>状态</th>
+                            <th>产品</th>
+                            <th>数量</th>
+                            <th class="mobile-hide">成本</th>
+                            <th class="mobile-hide">固返</th>
+                            <th class="mobile-hide">利润</th>
+                            <th class="mobile-hide">卖出</th>
+                            <th class="mobile-hide">备注</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${records}">
+                            <td th:text="${#temporals.format(item.occurredAt, 'yyyy-MM-dd HH:mm')}">2026-04-02 12:00</td>
+                            <td class="mobile-hide">
+                                <span th:text="${item.reporterDisplayName}">张三</span>
+                                <span class="record-tag self" th:if="${item.selfReporter}">本人</span>
+                            </td>
+                            <td>
+                                <span class="record-tag"
+                                      th:classappend="${item.recordType == 'INBOUND'} ? ' inbound' : ' report'"
+                                      th:text="${item.recordTypeLabel}">报单</span>
+                            </td>
+                            <td>
+                                <span class="record-tag"
+                                      th:classappend="${item.recordStatus == 'INVENTORIED_PENDING_SETTLEMENT'} ? ' pending' : (item.recordStatus == 'SETTLED' ? ' settled' : ' uninventoried')"
+                                      th:text="${item.recordStatusLabel}">未入库</span>
+                            </td>
+                            <td>
+                                <strong th:text="${item.productName}">产品</strong>
+                                <p class="field-hint" th:text="|归属：${item.ownerDisplayName}|">归属</p>
+                            </td>
+                            <td th:text="${item.quantity}">0</td>
+                            <td class="mobile-hide" th:text="|¥ ${item.costAmount}|">¥0.00</td>
+                            <td class="mobile-hide" th:text="|¥ ${item.fixedReturnAmount}|">¥0.00</td>
+                            <td class="mobile-hide" th:text="|¥ ${item.profitAmount}|">¥0.00</td>
+                            <td class="mobile-hide" th:text="|¥ ${item.soldAmount}|">¥0.00</td>
+                            <td class="mobile-hide" th:text="${#strings.isEmpty(item.remark) ? '—' : item.remark}">备注</td>
+                            <td>
+                                <div class="row-actions">
+                                    <a class="ghost-btn small-btn" th:href="@{'/business/' + ${item.id} + '/edit'}">编辑</a>
+                                    <form th:action="@{'/business/' + ${item.id} + '/delete'}" method="post" onsubmit="return confirm('确定删除这条经营记录吗？');">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <input type="hidden" name="startDate" th:value="${startDate}">
+                                        <input type="hidden" name="endDate" th:value="${endDate}">
+                                        <input type="hidden" name="scope" th:value="${scope}">
+                                        <input type="hidden" name="page" th:value="${pageData.current}">
+                                        <input type="hidden" name="view" value="records">
+                                        <button type="submit" class="danger-btn small-btn">删除</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-            <div class="mobile-record-list" th:if="${!records.isEmpty()}">
-                <article class="entry-card compact-card business-record-card" th:each="item : ${records}">
-                    <div class="entry-stamp small-stamp">
-                        <span th:text="${#temporals.format(item.occurredAt, 'MM-dd')}">04-02</span>
-                        <small th:text="${#temporals.format(item.occurredAt, 'HH:mm')}">12:00</small>
-                    </div>
-                    <div class="entry-body">
-                        <div class="entry-head">
-                            <div>
-                                <span class="meta-note" th:text="${item.selfReporter ? '本人' : '报单人'}">报单人</span>
-                                <h4 th:text="${item.productName}">产品</h4>
-                                <p class="field-hint" th:text="|${item.reporterDisplayName} · ${item.ownerDisplayName}|">张三 · 后台</p>
-                            </div>
-                            <div class="entry-actions">
-                                <a class="ghost-btn small-btn" th:href="@{'/business/' + ${item.id} + '/edit'}">编辑</a>
-                                <form th:action="@{'/business/' + ${item.id} + '/delete'}" method="post" onsubmit="return confirm('确定删除这条经营记录吗？');">
-                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                    <button type="submit" class="danger-btn small-btn">删除</button>
-                                </form>
-                            </div>
+                <div class="mobile-record-list" th:if="${!records.isEmpty()}">
+                    <article class="entry-card compact-card business-record-card" th:each="item : ${records}">
+                        <div class="entry-stamp small-stamp">
+                            <span th:text="${#temporals.format(item.occurredAt, 'MM-dd')}">04-02</span>
+                            <small th:text="${#temporals.format(item.occurredAt, 'HH:mm')}">12:00</small>
                         </div>
-                        <div class="badge-row record-chip-row">
-                            <span class="record-tag"
-                                  th:classappend="${item.recordType == 'INBOUND'} ? ' inbound' : ' report'"
-                                  th:text="${item.recordTypeLabel}">报单</span>
-                            <span class="record-tag"
-                                  th:classappend="${item.recordStatus == 'INVENTORIED_PENDING_SETTLEMENT'} ? ' pending' : (item.recordStatus == 'SETTLED' ? ' settled' : ' uninventoried')"
-                                  th:text="${item.recordStatusLabel}">未入库</span>
-                            <span class="record-tag self" th:if="${item.selfReporter}">本人</span>
+                        <div class="entry-body">
+                            <div class="entry-head">
+                                <div>
+                                    <span class="meta-note" th:text="${item.selfReporter ? '本人' : '报单人'}">报单人</span>
+                                    <h4 th:text="${item.productName}">产品</h4>
+                                    <p class="field-hint" th:text="|${item.reporterDisplayName} · 归属 ${item.ownerDisplayName}|">张三 · 归属</p>
+                                </div>
+                                <div class="entry-actions">
+                                    <a class="ghost-btn small-btn" th:href="@{'/business/' + ${item.id} + '/edit'}">编辑</a>
+                                    <form th:action="@{'/business/' + ${item.id} + '/delete'}" method="post" onsubmit="return confirm('确定删除这条经营记录吗？');">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                        <input type="hidden" name="startDate" th:value="${startDate}">
+                                        <input type="hidden" name="endDate" th:value="${endDate}">
+                                        <input type="hidden" name="scope" th:value="${scope}">
+                                        <input type="hidden" name="page" th:value="${pageData.current}">
+                                        <input type="hidden" name="view" value="records">
+                                        <button type="submit" class="danger-btn small-btn">删除</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="badge-row record-chip-row">
+                                <span class="record-tag"
+                                      th:classappend="${item.recordType == 'INBOUND'} ? ' inbound' : ' report'"
+                                      th:text="${item.recordTypeLabel}">报单</span>
+                                <span class="record-tag"
+                                      th:classappend="${item.recordStatus == 'INVENTORIED_PENDING_SETTLEMENT'} ? ' pending' : (item.recordStatus == 'SETTLED' ? ' settled' : ' uninventoried')"
+                                      th:text="${item.recordStatusLabel}">未入库</span>
+                                <span class="record-tag self" th:if="${item.selfReporter}">本人</span>
+                            </div>
+                            <div class="record-info-grid">
+                                <div class="record-info-item">
+                                    <span>数量</span>
+                                    <strong th:text="${item.quantity}">0</strong>
+                                </div>
+                                <div class="record-info-item">
+                                    <span>成本</span>
+                                    <strong th:text="|¥ ${item.costAmount}|">¥0.00</strong>
+                                </div>
+                                <div class="record-info-item">
+                                    <span>固返</span>
+                                    <strong th:text="|¥ ${item.fixedReturnAmount}|">¥0.00</strong>
+                                </div>
+                                <div class="record-info-item">
+                                    <span>利润</span>
+                                    <strong th:text="|¥ ${item.profitAmount}|">¥0.00</strong>
+                                </div>
+                                <div class="record-info-item">
+                                    <span>卖出</span>
+                                    <strong th:text="|¥ ${item.soldAmount}|">¥0.00</strong>
+                                </div>
+                            </div>
+                            <p class="field-hint record-remark"
+                               th:text="${#strings.isEmpty(item.remark) ? '备注：—' : '备注：' + item.remark}">备注：—</p>
                         </div>
-                        <div class="record-info-grid">
-                            <div class="record-info-item">
-                                <span>数量</span>
-                                <strong th:text="${item.quantity}">0</strong>
-                            </div>
-                            <div class="record-info-item">
-                                <span>成本</span>
-                                <strong th:text="|¥ ${item.costAmount}|">¥0.00</strong>
-                            </div>
-                            <div class="record-info-item">
-                                <span>固返</span>
-                                <strong th:text="|¥ ${item.fixedReturnAmount}|">¥0.00</strong>
-                            </div>
-                            <div class="record-info-item">
-                                <span>利润</span>
-                                <strong th:text="|¥ ${item.profitAmount}|">¥0.00</strong>
-                            </div>
-                            <div class="record-info-item">
-                                <span>卖出</span>
-                                <strong th:text="|¥ ${item.soldAmount}|">¥0.00</strong>
-                            </div>
-                        </div>
-                        <p class="field-hint record-remark"
-                           th:text="${#strings.isEmpty(item.remark) ? '备注：—' : '备注：' + item.remark}">备注：—</p>
-                    </div>
-                </article>
-            </div>
-        </section>
+                    </article>
+                </div>
+            </section>
+
+            <section class="pager-bar reveal" th:if="${pageData.pages > 1}">
+                <a class="ghost-btn small-btn"
+                   th:if="${pageData.current > 1}"
+                   th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope=${scope}, page=${pageData.current - 1}, view='records')}">上一页</a>
+                <span class="status-pill" th:text="|第 ${pageData.current} / ${pageData.pages} 页|">第 1 / 1 页</span>
+                <a class="ghost-btn small-btn"
+                   th:if="${pageData.current < pageData.pages}"
+                   th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope=${scope}, page=${pageData.current + 1}, view='records')}">下一页</a>
+            </section>
+        </div>
     </main>
 </div>
+<div th:replace="~{fragments/mobile-tabbar :: mobileTabbar(activeTab='business')}"></div>
 <script th:src="@{/js/code-copy.js}"></script>
 </body>
 </html>

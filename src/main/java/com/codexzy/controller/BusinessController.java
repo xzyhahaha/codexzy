@@ -1,11 +1,14 @@
 package com.codexzy.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.codexzy.dto.BusinessRecordFormDTO;
+import com.codexzy.dto.BusinessRecordViewDTO;
 import com.codexzy.entity.BusinessAccount;
 import com.codexzy.entity.User;
 import com.codexzy.service.BusinessAccountService;
 import com.codexzy.service.BusinessRecordService;
 import com.codexzy.service.BusinessReporterNoteService;
+import com.codexzy.service.BusinessReportTargetService;
 import com.codexzy.service.UserService;
 import com.codexzy.util.BusinessRecordStatusUtil;
 import jakarta.annotation.Resource;
@@ -33,6 +36,10 @@ public class BusinessController {
     private static final String TYPE_ALL = "ALL";
     private static final String TYPE_REPORT = "REPORT";
     private static final String TYPE_INBOUND = "INBOUND";
+    private static final long RECORD_PAGE_SIZE = 10L;
+    private static final String MOBILE_VIEW_OVERVIEW = "overview";
+    private static final String MOBILE_VIEW_RECORDS = "records";
+    private static final String MOBILE_VIEW_FILTER = "filter";
 
     @Resource
     private UserService userService;
@@ -46,24 +53,34 @@ public class BusinessController {
     @Resource
     private BusinessReporterNoteService businessReporterNoteService;
 
+    @Resource
+    private BusinessReportTargetService businessReportTargetService;
+
     @GetMapping
     public String index(Authentication authentication,
                         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
                         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
                         @RequestParam(defaultValue = TYPE_ALL) String scope,
+                        @RequestParam(defaultValue = "1") long page,
+                        @RequestParam(defaultValue = MOBILE_VIEW_OVERVIEW) String view,
                         Model model) {
         User currentUser = userService.getByUsername(authentication.getName());
         BusinessAccount businessAccount = businessAccountService.getOrCreateByUserId(currentUser.getId());
         DateRange range = normalizeRange(startDate, endDate);
         String normalizedScope = normalizeScope(scope);
+        String activeMobileView = normalizeMobileView(view);
+        IPage<BusinessRecordViewDTO> pageData = businessRecordService.getRecordPage(
+                currentUser.getId(), range.startDate, range.endDate, normalizedScope, page, RECORD_PAGE_SIZE);
 
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("businessAccount", businessAccount);
         model.addAttribute("startDate", range.startDate);
         model.addAttribute("endDate", range.endDate);
         model.addAttribute("scope", normalizedScope);
+        model.addAttribute("activeMobileView", activeMobileView);
         model.addAttribute("summary", businessRecordService.getSummary(currentUser.getId(), range.startDate, range.endDate, normalizedScope));
-        model.addAttribute("records", businessRecordService.listRecords(currentUser.getId(), range.startDate, range.endDate, normalizedScope));
+        model.addAttribute("pageData", pageData);
+        model.addAttribute("records", pageData.getRecords());
         model.addAttribute("reporterSummaries", businessRecordService.listReporterSummaries(currentUser.getId(), range.startDate, range.endDate, normalizedScope));
         model.addAttribute("reportStart", range.startDate.atStartOfDay());
         model.addAttribute("reportEnd", range.endDate.atTime(23, 59, 59));
@@ -78,12 +95,16 @@ public class BusinessController {
         BusinessAccount businessAccount = businessAccountService.getOrCreateByUserId(currentUser.getId());
         String normalizedType = normalizeRecordType(type);
         boolean inboundMode = TYPE_INBOUND.equals(normalizedType);
+        var boundTargets = businessReportTargetService.listOptions(currentUser.getId());
 
         if (!model.containsAttribute("formDTO")) {
             BusinessRecordFormDTO formDTO = new BusinessRecordFormDTO();
             formDTO.setRecordType(normalizedType);
             formDTO.setRecordStatus(BusinessRecordStatusUtil.defaultStatus(normalizedType));
-            formDTO.setTargetReportCode(inboundMode ? businessAccount.getReportCode() : "");
+            formDTO.setTargetReportCode(inboundMode
+                    ? businessAccount.getReportCode()
+                    : (boundTargets.isEmpty() ? "" : boundTargets.get(0).getTargetReportCode()));
+            formDTO.setBindTarget(Boolean.FALSE);
             formDTO.setOccurredAt(defaultOccurredAt());
             model.addAttribute("formDTO", formDTO);
         }
@@ -99,6 +120,7 @@ public class BusinessController {
                 ? "这条记录会进入你自己的经营后台。"
                 : "填对方的报码后，记录会进入对方的经营后台。");
         model.addAttribute("submitLabel", "保存记录");
+        model.addAttribute("boundTargets", boundTargets);
         return "business/form";
     }
 
@@ -140,6 +162,7 @@ public class BusinessController {
             model.addAttribute("submitLabel", "保存修改");
             model.addAttribute("recordId", id);
             model.addAttribute("recordTypeLabel", TYPE_INBOUND.equals(record.getRecordType()) ? "商品入库" : "报单");
+            model.addAttribute("boundTargets", businessReportTargetService.listOptions(currentUser.getId()));
             return "business/form";
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
@@ -162,7 +185,10 @@ public class BusinessController {
         User currentUser = userService.getByUsername(authentication.getName());
         try {
             businessRecordService.createRecord(currentUser.getId(), formDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "经营记录已保存");
+            redirectAttributes.addFlashAttribute("successMessage",
+                    TYPE_REPORT.equals(normalizedType) && Boolean.TRUE.equals(formDTO.getBindTarget())
+                            ? "经营记录已保存，目标账号已加入常用报单列表"
+                            : "经营记录已保存");
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             redirectAttributes.addFlashAttribute("formDTO", formDTO);
@@ -198,6 +224,12 @@ public class BusinessController {
     @PostMapping("/{id}/delete")
     public String delete(Authentication authentication,
                          @PathVariable("id") Long id,
+                         @RequestParam(required = false) Long reporterId,
+                         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
+                         @RequestParam(defaultValue = TYPE_ALL) String scope,
+                         @RequestParam(required = false) Long page,
+                         @RequestParam(required = false) String view,
                          RedirectAttributes redirectAttributes) {
         User currentUser = userService.getByUsername(authentication.getName());
         try {
@@ -206,7 +238,12 @@ public class BusinessController {
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
         }
-        return "redirect:/business";
+
+        String query = buildQuery(startDate, endDate, scope, page, view);
+        if (reporterId != null) {
+            return "redirect:/business/reporters/" + reporterId + query;
+        }
+        return "redirect:/business" + query;
     }
 
     @GetMapping("/reporters/{reporterId}")
@@ -215,6 +252,8 @@ public class BusinessController {
                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
                            @RequestParam(defaultValue = TYPE_ALL) String scope,
+                           @RequestParam(defaultValue = "1") long page,
+                           @RequestParam(defaultValue = MOBILE_VIEW_OVERVIEW) String view,
                            Model model) {
         User currentUser = userService.getByUsername(authentication.getName());
         BusinessAccount businessAccount = businessAccountService.getOrCreateByUserId(currentUser.getId());
@@ -225,6 +264,9 @@ public class BusinessController {
 
         DateRange range = normalizeRange(startDate, endDate);
         String normalizedScope = normalizeScope(scope);
+        String activeMobileView = normalizeMobileView(view);
+        IPage<BusinessRecordViewDTO> pageData = businessRecordService.getReporterRecordPage(
+                currentUser.getId(), reporterId, range.startDate, range.endDate, normalizedScope, page, RECORD_PAGE_SIZE);
 
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("businessAccount", businessAccount);
@@ -232,10 +274,12 @@ public class BusinessController {
         model.addAttribute("startDate", range.startDate);
         model.addAttribute("endDate", range.endDate);
         model.addAttribute("scope", normalizedScope);
+        model.addAttribute("activeMobileView", activeMobileView);
+        model.addAttribute("pageData", pageData);
+        model.addAttribute("records", pageData.getRecords());
         model.addAttribute("isSelfReporter", currentUser.getId().equals(reporterId));
         model.addAttribute("reporterNote", businessReporterNoteService.getNoteName(currentUser.getId(), reporterId));
         model.addAttribute("reporterSummary", businessRecordService.getReporterSummary(currentUser.getId(), reporterId, range.startDate, range.endDate, normalizedScope));
-        model.addAttribute("records", businessRecordService.listRecordsByReporter(currentUser.getId(), reporterId, range.startDate, range.endDate, normalizedScope));
         return "business/reporter";
     }
 
@@ -246,6 +290,8 @@ public class BusinessController {
                                      @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
                                      @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
                                      @RequestParam(defaultValue = TYPE_ALL) String scope,
+                                     @RequestParam(required = false) Long page,
+                                     @RequestParam(required = false) String view,
                                      RedirectAttributes redirectAttributes) {
         User currentUser = userService.getByUsername(authentication.getName());
         User reporterUser = userService.getById(reporterId);
@@ -256,7 +302,7 @@ public class BusinessController {
 
         businessReporterNoteService.saveOrDelete(currentUser.getId(), reporterId, noteName);
         redirectAttributes.addFlashAttribute("successMessage", "备注已保存");
-        return "redirect:/business/reporters/" + reporterId + buildQuery(startDate, endDate, scope);
+        return "redirect:/business/reporters/" + reporterId + buildQuery(startDate, endDate, scope, page, view);
     }
 
     private DateRange normalizeRange(LocalDate startDate, LocalDate endDate) {
@@ -288,13 +334,24 @@ public class BusinessController {
         return TYPE_REPORT;
     }
 
+    private String normalizeMobileView(String view) {
+        if (MOBILE_VIEW_RECORDS.equalsIgnoreCase(view)) {
+            return MOBILE_VIEW_RECORDS;
+        }
+        if (MOBILE_VIEW_FILTER.equalsIgnoreCase(view)) {
+            return MOBILE_VIEW_FILTER;
+        }
+        return MOBILE_VIEW_OVERVIEW;
+    }
+
     private LocalDateTime defaultOccurredAt() {
         return LocalDateTime.now().withSecond(0).withNano(0);
     }
 
-    private String buildQuery(LocalDate startDate, LocalDate endDate, String scope) {
+    private String buildQuery(LocalDate startDate, LocalDate endDate, String scope, Long page, String view) {
         StringBuilder query = new StringBuilder();
         boolean hasParam = false;
+        String normalizedView = normalizeMobileView(view);
         if (startDate != null) {
             query.append("?startDate=").append(startDate);
             hasParam = true;
@@ -305,6 +362,14 @@ public class BusinessController {
         }
         if (scope != null && !TYPE_ALL.equalsIgnoreCase(scope)) {
             query.append(hasParam ? "&" : "?").append("scope=").append(scope);
+            hasParam = true;
+        }
+        if (page != null && page > 1) {
+            query.append(hasParam ? "&" : "?").append("page=").append(page);
+            hasParam = true;
+        }
+        if (!MOBILE_VIEW_OVERVIEW.equals(normalizedView)) {
+            query.append(hasParam ? "&" : "?").append("view=").append(normalizedView);
         }
         return query.toString();
     }

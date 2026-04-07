@@ -1,5 +1,6 @@
 package com.codexzy.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.codexzy.dto.BusinessRecordFormDTO;
 import com.codexzy.dto.BusinessRecordSummaryDTO;
 import com.codexzy.dto.BusinessRecordViewDTO;
@@ -21,11 +22,15 @@ public interface BusinessRecordService {
 
     BusinessRecordSummaryDTO getSummary(Long ownerUserId, LocalDate startDate, LocalDate endDate, String scope);
 
+    IPage<BusinessRecordViewDTO> getRecordPage(Long ownerUserId, LocalDate startDate, LocalDate endDate, String scope, long current, long size);
+
     List<BusinessRecordViewDTO> listRecords(Long ownerUserId, LocalDate startDate, LocalDate endDate, String scope);
 
     List<BusinessReporterSummaryDTO> listReporterSummaries(Long ownerUserId, LocalDate startDate, LocalDate endDate, String scope);
 
     BusinessRecordSummaryDTO getReporterSummary(Long ownerUserId, Long reporterUserId, LocalDate startDate, LocalDate endDate, String scope);
+
+    IPage<BusinessRecordViewDTO> getReporterRecordPage(Long ownerUserId, Long reporterUserId, LocalDate startDate, LocalDate endDate, String scope, long current, long size);
 
     List<BusinessRecordViewDTO> listRecordsByReporter(Long ownerUserId, Long reporterUserId, LocalDate startDate, LocalDate endDate, String scope);
 }
