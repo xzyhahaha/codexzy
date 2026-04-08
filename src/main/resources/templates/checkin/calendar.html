@@ -12,7 +12,6 @@
         <div class="brand-block">
             <a class="brand-mark" th:href="@{/}">CZ</a>
             <div class="brand-copy">
-                <span class="section-tag">月历</span>
                 <h1>打卡月历</h1>
                 <p th:text="|${currentLabel} · ${stats.currentMonthCount} 次|">2026年4月 · 0 次</p>
             </div>
@@ -24,8 +23,7 @@
             <article class="section-card main-column">
                 <div class="section-head">
                     <div>
-                        <span class="section-tag">月历</span>
-                        <h3>按天查看记录</h3>
+                        <h3>月历</h3>
                     </div>
                     <div class="section-tools">
                         <a class="ghost-btn small-btn" th:href="@{/checkin}">打卡列表</a>
@@ -51,11 +49,11 @@
                        th:classappend="(${day.currentMonth} ? '' : ' is-muted') + (${day.checkedIn} ? ' is-active' : '') + (${day.today} ? ' is-today' : '')">
                         <div class="calendar-card-top">
                             <span class="calendar-day-number" th:text="${day.dayOfMonth}">1</span>
-                            <span class="calendar-count" th:text="${day.recordCount > 0 ? day.recordCount + ' 条' : '空白'}">空白</span>
+                            <span class="calendar-count" th:text="${day.recordCount > 0 ? day.recordCount + ' 条' : '空'}">空</span>
                         </div>
                         <div class="calendar-card-body">
-                            <strong th:text="${day.primaryTitle != null && !day.primaryTitle.isEmpty() ? day.primaryTitle : '当天暂无记录'}">当天暂无记录</strong>
-                            <span class="calendar-link-hint" th:text="${day.checkedIn} ? '查看记录' : '补充记录'">查看记录</span>
+                            <strong th:text="${day.primaryTitle != null && !day.primaryTitle.isEmpty() ? day.primaryTitle : '—'}">—</strong>
+                            <span class="calendar-link-hint" th:text="${day.checkedIn} ? '记录' : '补卡'">记录</span>
                         </div>
                     </a>
                 </div>

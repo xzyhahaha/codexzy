@@ -22,29 +22,15 @@
     <main class="page-stack">
         <section class="hero-banner landing-hero reveal">
             <div class="hero-copy">
-                <span class="section-tag">今日入口</span>
                 <h2>
                     <span th:text="${#strings.isEmpty(currentUser.nickname) ? currentUser.username : currentUser.nickname}">用户</span>
                     <br>
-                    先打开常用模块。
+                    先打开常用模块
                 </h2>
-                <p th:text="${todayLabel}">2026年4月2日 星期四</p>
                 <div class="hero-actions">
                     <a class="solid-btn" th:href="@{/business}">进入经营</a>
                     <a class="ghost-btn" th:href="@{/checkin}">进入打卡</a>
                 </div>
-            </div>
-            <div class="hero-panel-grid">
-                <article class="insight-card">
-                    <span class="meta-note">当前账号</span>
-                    <strong th:text="${#strings.isEmpty(currentUser.nickname) ? currentUser.username : currentUser.nickname}">用户</strong>
-                    <p th:text="|用户名：${currentUser.username}|">用户名</p>
-                </article>
-                <article class="insight-card">
-                    <span class="meta-note">打卡进度</span>
-                    <strong th:text="${stats.currentMonthCount}">0</strong>
-                    <p>本月打卡</p>
-                </article>
             </div>
         </section>
 
@@ -60,7 +46,6 @@
                     <span>汇总</span>
                 </div>
                 <div class="home-module-card__footer">
-                    <span class="choice-meta">经营记录</span>
                     <span class="choice-cta">进入</span>
                 </div>
             </a>
@@ -85,7 +70,6 @@
                     </article>
                 </div>
                 <div class="home-module-card__footer">
-                    <span class="choice-meta">打卡记录</span>
                     <span class="choice-cta">进入</span>
                 </div>
             </a>
@@ -110,7 +94,6 @@
                     </article>
                 </div>
                 <div class="home-module-card__footer">
-                    <span class="choice-meta">资料整理</span>
                     <span class="choice-cta">进入</span>
                 </div>
             </a>
@@ -121,12 +104,10 @@
                     <h3>我的 / 设置</h3>
                 </div>
                 <div class="home-module-card__profile">
-                    <span class="home-module-card__eyebrow">当前账号</span>
                     <strong th:text="${#strings.isEmpty(currentUser.nickname) ? '未设置昵称' : currentUser.nickname}">未设置昵称</strong>
-                    <p th:text="|用户名：${currentUser.username}|">用户名</p>
+                    <p th:text="|${currentUser.username}|">用户名</p>
                 </div>
                 <div class="home-module-card__footer">
-                    <span class="choice-meta">账号设置</span>
                     <span class="choice-cta">进入</span>
                 </div>
             </a>

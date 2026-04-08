@@ -426,6 +426,11 @@ button {
         linear-gradient(135deg, #16222e 0%, #203546 52%, #295158 100%);
 }
 
+.landing-hero,
+.business-hero {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .hero-banner::before {
     content: "";
     position: absolute;
@@ -467,13 +472,6 @@ button {
 .business-hero .hero-copy p {
     max-width: 30rem;
     margin-top: 14px;
-}
-
-.business-hero-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-top: 16px;
 }
 
 .insight-card {
@@ -1851,8 +1849,8 @@ textarea:focus {
 .reporter-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin-top: 18px;
+    gap: 12px;
+    margin-top: 14px;
 }
 
 .reporter-card {
@@ -1860,9 +1858,9 @@ textarea:focus {
     overflow: hidden;
     display: flex;
     justify-content: space-between;
-    gap: 16px;
-    padding: 20px 22px;
-    border-radius: 24px 24px 14px 24px;
+    gap: 12px;
+    padding: 16px 18px;
+    border-radius: 20px 20px 12px 20px;
     border: 1px solid rgba(33, 45, 57, 0.08);
     background: linear-gradient(180deg, rgba(255, 251, 246, 0.94), rgba(241, 235, 227, 0.88));
     box-shadow: 0 16px 28px rgba(42, 36, 32, 0.1);
@@ -1876,23 +1874,25 @@ textarea:focus {
 }
 
 .reporter-card h4 {
-    margin: 10px 0 8px;
+    margin: 0 0 4px;
     font-family: "Georgia", "Songti SC", serif;
-    font-size: 24px;
+    font-size: 20px;
     line-height: 1.15;
 }
 
 .reporter-card p {
     margin: 0;
+    font-size: 12px;
+    color: var(--ink-soft);
 }
 
 .reporter-card p + p {
-    margin-top: 6px;
+    margin-top: 4px;
 }
 
 .reporter-card strong {
     align-self: flex-end;
-    font-size: 30px;
+    font-size: 24px;
     font-family: "Georgia", "Songti SC", serif;
     color: var(--accent-deep);
 }
@@ -1945,11 +1945,67 @@ textarea:focus {
 }
 
 .profile-page .content-grid {
+    grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
+    gap: 18px;
 }
 
-.profile-page .dark-card {
-    color: #f4efe8;
+.profile-account-panel {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(33, 45, 57, 0.12);
+    display: grid;
+    gap: 14px;
+}
+
+.profile-account-head {
+    margin-bottom: 0;
+}
+
+.profile-account-list {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.profile-account-list article {
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(33, 45, 57, 0.08);
+}
+
+.profile-account-list strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.35;
+    font-family: inherit;
+    color: var(--ink-soft);
+}
+
+.profile-account-list p {
+    margin: 0;
+    color: var(--ink);
+    line-height: 1.55;
+}
+
+.profile-code-panel {
+    margin-top: 2px;
+}
+
+.profile-account-actions {
+    margin-top: 2px;
+    padding-top: 0;
+    border-top: 0;
+}
+
+.profile-subsection {
+    padding-top: 18px;
+    border-top: 1px solid rgba(33, 45, 57, 0.12);
+    display: grid;
+    gap: 14px;
 }
 
 .checkin-form-page .site-masthead {
@@ -2102,22 +2158,21 @@ textarea:focus {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 42px;
-    padding: 10px 14px;
-    border-radius: 999px;
+    min-height: 38px;
+    padding: 8px 12px;
+    border-radius: 16px;
     border: 1px solid rgba(33, 45, 57, 0.08);
     background: rgba(255, 255, 255, 0.8);
     color: var(--ink-soft);
-    font-size: 13px;
-    font-weight: 700;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    font-size: 12px;
+    font-weight: 600;
+    transition: background 0.2s ease, color 0.2s ease;
 }
 
 .business-mobile-viewbar__item.is-active {
     color: #fff;
     border-color: transparent;
     background: linear-gradient(135deg, var(--accent) 0%, var(--teal) 100%);
-    box-shadow: 0 12px 20px rgba(39, 95, 99, 0.18);
 }
 
 .business-mobile-panel {
@@ -2224,6 +2279,10 @@ textarea:focus {
 
     .home-primary-stack {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .profile-account-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -2783,11 +2842,6 @@ textarea:focus {
         width: 100%;
     }
 
-    .business-hero-links {
-        margin-top: 12px;
-        gap: 12px;
-    }
-
     .business-hero .hero-actions .solid-btn,
     .business-hero .hero-actions .ghost-btn {
         width: 100%;
@@ -2801,22 +2855,22 @@ textarea:focus {
 
     .business-mobile-viewbar {
         position: sticky;
-        top: 10px;
+        top: 8px;
         z-index: 8;
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 8px;
-        padding: 6px;
-        border-radius: 22px;
+        gap: 6px;
+        padding: 4px;
+        border-radius: 18px;
         border: 1px solid rgba(33, 45, 57, 0.08);
         background: rgba(255, 252, 247, 0.94);
         backdrop-filter: blur(18px);
-        box-shadow: 0 16px 28px rgba(42, 36, 32, 0.14);
+        box-shadow: 0 10px 18px rgba(42, 36, 32, 0.08);
     }
 
     .business-mobile-viewbar__item {
-        padding: 9px 10px;
-        min-height: 40px;
+        padding: 8px 10px;
+        min-height: 36px;
         font-size: 12px;
     }
 
@@ -2844,6 +2898,20 @@ textarea:focus {
 
     .reporter-card {
         flex-direction: column;
+    }
+
+    .reporter-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reporter-card {
+        gap: 10px;
+        padding: 14px 16px;
+    }
+
+    .reporter-card strong {
+        align-self: flex-start;
+        font-size: 22px;
     }
 }
 
@@ -2939,12 +3007,6 @@ textarea:focus {
         font-size: 13px;
     }
 
-    .business-hero-links {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 8px;
-    }
-
     .business-form-block {
         padding: 18px;
         gap: 14px;
@@ -2952,6 +3014,10 @@ textarea:focus {
 
     .business-form-block__head h4 {
         font-size: 20px;
+    }
+
+    .profile-account-list {
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .module-tabbar {

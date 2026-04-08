@@ -12,7 +12,6 @@
         <div class="brand-block">
             <a class="brand-mark" th:href="@{/}">CZ</a>
             <div class="brand-copy">
-                <span class="section-tag">日期详情</span>
                 <h1 th:text="${selectedDateLabel}">2026年4月2日</h1>
                 <p th:text="|当天 ${records.size()} 条 · 本月 ${stats.currentMonthCount} 次|">当天 0 条 · 本月 0 次</p>
             </div>
@@ -25,8 +24,7 @@
             <article class="section-card main-column">
                 <div class="section-head">
                     <div>
-                        <span class="section-tag">当天记录</span>
-                        <h3>这一天的内容</h3>
+                        <h3>当天</h3>
                     </div>
                     <div class="section-tools">
                         <a class="ghost-btn small-btn" th:href="@{/checkin/calendar}">返回月历</a>
@@ -38,9 +36,9 @@
                 </div>
 
                 <div class="empty-panel" th:if="${records.isEmpty()}">
-                    <h4>这一天还没有记录</h4>
+                    <h4>暂无记录</h4>
                     <a class="solid-btn"
-                       th:href="@{/checkin/form(date=${#temporals.format(selectedDate, 'yyyy-MM-dd')}, returnTo=${returnTo})}">现在补卡</a>
+                       th:href="@{/checkin/form(date=${#temporals.format(selectedDate, 'yyyy-MM-dd')}, returnTo=${returnTo})}">补卡</a>
                 </div>
 
                 <div class="entry-list" th:if="${!records.isEmpty()}">
@@ -56,7 +54,7 @@
                                     <a class="ghost-btn small-btn" th:href="@{/checkin/{id}/edit(id=${item.id}, returnTo=${returnTo})}">编辑</a>
                                 </div>
                             </div>
-                            <p th:text="${#strings.isEmpty(item.content) ? '这条记录没有填写详细内容。' : item.content}">内容</p>
+                            <p th:text="${#strings.isEmpty(item.content) ? '—' : item.content}">—</p>
                         </div>
                     </article>
                 </div>

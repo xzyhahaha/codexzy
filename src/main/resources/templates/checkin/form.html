@@ -12,9 +12,7 @@
         <div class="brand-block">
             <a class="brand-mark" th:href="@{/}">CZ</a>
             <div class="brand-copy">
-                <span class="section-tag">打卡编辑</span>
                 <h1 th:text="${formTitle}">新建打卡</h1>
-                <p th:text="${isEdit ? '修改这条打卡内容' : '写下一条新的打卡记录'}">写下一条新的打卡记录</p>
             </div>
         </div>
         <div class="section-tools">
@@ -27,8 +25,7 @@
             <article class="section-card main-column">
                 <div class="section-head">
                     <div>
-                        <span class="section-tag" th:text="${isEdit} ? '编辑模式' : '新建模式'">新建模式</span>
-                        <h3 th:text="${isEdit} ? '修改已有打卡内容' : '写下一条新的打卡记录'">写下一条新的打卡记录</h3>
+                        <h3 th:text="${isEdit} ? '编辑' : '新建'">新建</h3>
                     </div>
                     <span class="status-pill" th:text="${isEdit ? '编辑中' : '待保存'}">待保存</span>
                 </div>
@@ -39,8 +36,7 @@
 
                     <section class="business-form-block">
                         <div class="business-form-block__head">
-                            <span class="section-tag">基础信息</span>
-                            <h4>先写标题和日期</h4>
+                            <h4>基础信息</h4>
                         </div>
 
                         <div class="form-grid">
@@ -60,8 +56,7 @@
 
                     <section class="business-form-block">
                         <div class="business-form-block__head">
-                            <span class="section-tag">内容</span>
-                            <h4>再补充今天做了什么</h4>
+                            <h4>内容</h4>
                         </div>
 
                         <div class="form-grid">
@@ -83,15 +78,11 @@
             <aside class="section-card side-tone business-form-side">
                 <div class="business-form-side__stack">
                     <article class="readonly-card">
-                        <span class="meta-note">当前模式</span>
                         <strong th:text="${isEdit ? '编辑打卡' : '新建打卡'}">新建打卡</strong>
-                        <p th:text="${isEdit ? '修改后会覆盖这条记录。' : '保存后会出现在列表和月历里。'}">保存后会出现在列表和月历里。</p>
                     </article>
 
                     <article class="readonly-card">
-                        <span class="meta-note">返回路径</span>
                         <strong th:text="${#strings.startsWith(returnTo, '/checkin/day') ? '当天记录' : '打卡列表'}">打卡列表</strong>
-                        <p th:text="${#strings.startsWith(returnTo, '/checkin/day') ? '保存后回到当前日期详情。' : '保存后回到当前打卡列表页。'}">保存后回到当前打卡列表页。</p>
                         <a class="ghost-btn small-btn" th:href="${returnTo}">直接返回</a>
                     </article>
                 </div>

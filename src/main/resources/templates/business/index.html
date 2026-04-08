@@ -12,9 +12,7 @@
         <div class="brand-block">
             <a class="brand-mark" th:href="@{/}">CZ</a>
             <div class="brand-copy">
-                <span class="section-tag">经营后台</span>
-                <h1>报单与入库中心</h1>
-                <p th:text="|${#temporals.format(startDate, 'MM-dd')} 至 ${#temporals.format(endDate, 'MM-dd')} · ${scope == 'ALL' ? '全部记录' : scope == 'REPORT' ? '报单' : '我的入库'}|">04-01 至 04-30 · 全部记录</p>
+                <h1>经营</h1>
             </div>
         </div>
     </header>
@@ -28,36 +26,12 @@
         <section class="hero-banner business-hero reveal"
                  th:with="returnTo=@{/business(startDate=${startDate}, endDate=${endDate}, scope=${scope}, page=${pageData.current}, view=${activeMobileView})}">
             <div class="hero-copy">
-                <span class="section-tag">主操作</span>
-                <h2>先报单，还是登记入库</h2>
-                <p th:text="|当前共 ${summary.recordCount} 条记录 · ${summary.totalQuantity} 件|">当前共 0 条记录 · 0 件</p>
+                <h2>报单 / 入库</h2>
+                <p th:text="|${summary.recordCount} 条 · ${summary.totalQuantity} 件|">0 条 · 0 件</p>
                 <div class="hero-actions">
                     <a class="solid-btn" th:href="@{/business/form(type='REPORT', returnTo=${returnTo})}">新建报单</a>
                     <a class="ghost-btn" th:href="@{/business/form(type='INBOUND', returnTo=${returnTo})}">登记入库</a>
                 </div>
-                <div class="business-hero-links">
-                    <a class="inline-link light-link" th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope=${scope}, view='records')}">进入记录</a>
-                    <a class="inline-link light-link" th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope=${scope}, view='filter')}">进入筛选</a>
-                </div>
-            </div>
-            <div class="hero-panel-grid">
-                <article class="insight-card business-filter-card">
-                    <span class="meta-note">当前筛选</span>
-                    <strong th:text="|${#temporals.format(startDate, 'MM-dd')} 至 ${#temporals.format(endDate, 'MM-dd')}|">04-01 至 04-30</strong>
-                    <div class="scope-bar business-hero-scope">
-                        <a class="scope-chip" th:classappend="${scope == 'ALL'} ? ' active' : ''"
-                           th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope='ALL', view='overview')}">全部</a>
-                        <a class="scope-chip" th:classappend="${scope == 'REPORT'} ? ' active' : ''"
-                           th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope='REPORT', view='overview')}">报单</a>
-                        <a class="scope-chip" th:classappend="${scope == 'INBOUND'} ? ' active' : ''"
-                           th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope='INBOUND', view='overview')}">入库</a>
-                    </div>
-                </article>
-                <article class="insight-card business-filter-card">
-                    <span class="meta-note">当前页</span>
-                    <strong th:text="|第 ${pageData.current} / ${pageData.pages == 0 ? 1 : pageData.pages} 页|">第 1 / 1 页</strong>
-                    <p th:text="|报单 ${summary.reportCount} · 入库 ${summary.inboundCount}|">报单 0 · 入库 0</p>
-                </article>
             </div>
         </section>
 
@@ -106,10 +80,8 @@
                 <article class="section-card">
                     <div class="section-head">
                         <div>
-                            <span class="section-tag">按人汇总</span>
-                            <h3>报单人概览</h3>
+                            <h3>报单人</h3>
                         </div>
-                        <a class="inline-link" th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope=${scope}, view='records')}">进入记录</a>
                     </div>
 
                     <div class="empty-panel small-empty" th:if="${reporterSummaries.isEmpty()}">
@@ -120,10 +92,8 @@
                         <a class="reporter-card" th:each="item : ${reporterSummaries}"
                            th:href="@{/business/reporters/{reporterId}(reporterId=${item.reporterUserId}, startDate=${startDate}, endDate=${endDate}, scope=${scope}, view='records')}">
                             <div>
-                                <span class="meta-note" th:text="${item.selfReporter ? '本人' : '报单人'}">报单人</span>
                                 <h4 th:text="${item.reporterDisplayName}">报单人</h4>
-                                <p th:text="|${item.recordCount} 条记录 · ${item.totalQuantity} 件|">0 条记录 · 0 件</p>
-                                <p th:text="|成本 ¥ ${item.totalCostAmount} · 卖出 ¥ ${item.totalSoldAmount}|">成本 ¥0.00 · 卖出 ¥0.00</p>
+                                <p th:text="|${item.recordCount} 条 · ${item.totalQuantity} 件|">0 条 · 0 件</p>
                             </div>
                             <strong th:text="|¥ ${item.totalProfitAmount}|">¥0.00</strong>
                         </a>
@@ -192,8 +162,7 @@
                         <h3>记录列表</h3>
                     </div>
                     <div class="section-tools">
-                        <a class="ghost-btn small-btn" th:href="@{/business(startDate=${startDate}, endDate=${endDate}, scope=${scope}, view='filter')}">筛选</a>
-                        <a class="inline-link" th:href="@{/business/form(type='REPORT', returnTo=${returnTo})}">新增报单</a>
+                        <a class="ghost-btn small-btn" th:href="@{/business/form(type='REPORT', returnTo=${returnTo})}">新建报单</a>
                     </div>
                 </div>
 
@@ -207,7 +176,6 @@
                         <thead>
                         <tr>
                             <th>时间</th>
-                            <th class="mobile-hide">报单人</th>
                             <th>类型</th>
                             <th>状态</th>
                             <th>产品</th>
@@ -223,10 +191,6 @@
                         <tbody>
                         <tr th:each="item : ${records}">
                             <td th:text="${#temporals.format(item.occurredAt, 'yyyy-MM-dd HH:mm')}">2026-04-02 12:00</td>
-                            <td class="mobile-hide">
-                                <span th:text="${item.reporterDisplayName}">张三</span>
-                                <span class="record-tag self" th:if="${item.selfReporter}">本人</span>
-                            </td>
                             <td>
                                 <span class="record-tag"
                                       th:classappend="${item.recordType == 'INBOUND'} ? ' inbound' : ' report'"
@@ -239,7 +203,6 @@
                             </td>
                             <td>
                                 <strong th:text="${item.productName}">产品</strong>
-                                <p class="field-hint" th:text="|归属：${item.ownerDisplayName}|">归属</p>
                             </td>
                             <td th:text="${item.quantity}">0</td>
                             <td class="mobile-hide" th:text="|¥ ${item.costAmount}|">¥0.00</td>
@@ -273,14 +236,12 @@
                             <small th:text="${#temporals.format(item.occurredAt, 'HH:mm')}">12:00</small>
                         </div>
                         <div class="entry-body">
-                            <div class="entry-head">
-                                <div>
-                                    <span class="meta-note" th:text="${item.selfReporter ? '本人' : '报单人'}">报单人</span>
-                                    <h4 th:text="${item.productName}">产品</h4>
-                                    <p class="field-hint" th:text="|${item.reporterDisplayName} · 归属 ${item.ownerDisplayName}|">张三 · 归属</p>
-                                </div>
-                                <div class="entry-actions">
-                                    <a class="ghost-btn small-btn" th:href="@{/business/{id}/edit(id=${item.id}, returnTo=${returnTo})}">编辑</a>
+                        <div class="entry-head">
+                            <div>
+                                <h4 th:text="${item.productName}">产品</h4>
+                            </div>
+                            <div class="entry-actions">
+                                <a class="ghost-btn small-btn" th:href="@{/business/{id}/edit(id=${item.id}, returnTo=${returnTo})}">编辑</a>
                                     <form th:action="@{'/business/' + ${item.id} + '/delete'}" method="post" onsubmit="return confirm('确定删除这条经营记录吗？');">
                                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
                                         <input type="hidden" name="startDate" th:value="${startDate}">
@@ -299,7 +260,6 @@
                                 <span class="record-tag"
                                       th:classappend="${item.recordStatus == 'INVENTORIED_PENDING_SETTLEMENT'} ? ' pending' : (item.recordStatus == 'SETTLED' ? ' settled' : ' uninventoried')"
                                       th:text="${item.recordStatusLabel}">未入库</span>
-                                <span class="record-tag self" th:if="${item.selfReporter}">本人</span>
                             </div>
                             <div class="record-info-grid">
                                 <div class="record-info-item">
@@ -324,7 +284,7 @@
                                 </div>
                             </div>
                             <p class="field-hint record-remark"
-                               th:text="${#strings.isEmpty(item.remark) ? '备注：—' : '备注：' + item.remark}">备注：—</p>
+                               th:text="${#strings.isEmpty(item.remark) ? '—' : item.remark}">—</p>
                         </div>
                     </article>
                 </div>

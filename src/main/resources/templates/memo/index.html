@@ -12,7 +12,6 @@
         <div class="brand-block">
             <a class="brand-mark" th:href="@{/}">CZ</a>
             <div class="brand-copy">
-                <span class="section-tag">资料页</span>
                 <h1>资料和文件</h1>
                 <p th:text="|${categoryCount} 个分类 · ${fileCount} 个文件|">0 个分类 · 0 个文件</p>
             </div>
@@ -29,19 +28,15 @@
             <article class="section-card main-column">
                 <div class="section-head">
                     <div>
-                        <span class="section-tag">上传</span>
-                        <h3>拖拽、点击或粘贴上传</h3>
+                        <h3>上传</h3>
                     </div>
                     <div class="badge-row">
-                        <span class="status-pill">拖拽</span>
-                        <span class="status-pill">粘贴</span>
-                        <span class="status-pill">选择</span>
+                        <span class="status-pill">上传</span>
                     </div>
                 </div>
 
                 <div class="empty-panel" th:if="${categories.isEmpty()}">
                     <h4>还没有可用分类</h4>
-                    <p>先建一个分类。</p>
                 </div>
 
                 <form th:if="${!categories.isEmpty()}" th:action="@{/memo/upload}" th:object="${uploadForm}" method="post" enctype="multipart/form-data" class="form-stack">
@@ -61,17 +56,16 @@
                         <div class="upload-zone-inner">
                             <div class="upload-glyph">+</div>
                             <div class="upload-copy">
-                                <h4>把文件拖到这里</h4>
-                                <p>也可以点击选择，或直接粘贴上传。</p>
+                                <h4>选择或拖入文件</h4>
                             </div>
-                            <div class="upload-meta" id="memoFileMeta">当前还没有选择文件</div>
+                            <div class="upload-meta" id="memoFileMeta">未选择文件</div>
                         </div>
                     </div>
                     <small class="field-error" th:if="${#fields.hasErrors('file')}" th:errors="*{file}"></small>
 
                     <label>
                         <span>备注</span>
-                        <textarea th:field="*{remark}" rows="4" placeholder="例如：投递版简历、项目流程图、备案截图、学习资料等"></textarea>
+                        <textarea th:field="*{remark}" rows="4" placeholder="补充一点说明"></textarea>
                         <small class="field-error" th:if="${#fields.hasErrors('remark')}" th:errors="*{remark}"></small>
                     </label>
 
@@ -84,8 +78,7 @@
             <aside class="section-card sticky-card side-tone">
                 <div class="section-head">
                     <div>
-                        <span class="section-tag">分类</span>
-                        <h3>先创建分类</h3>
+                        <h3>分类</h3>
                     </div>
                 </div>
 
@@ -94,7 +87,7 @@
 
                     <label>
                         <span>分类名称</span>
-                        <input type="text" th:field="*{categoryName}" placeholder="例如：简历 / 项目文档 / 证书 / 备案截图">
+                        <input type="text" th:field="*{categoryName}" placeholder="分类名称">
                         <small class="field-error" th:if="${#fields.hasErrors('categoryName')}" th:errors="*{categoryName}"></small>
                     </label>
 
@@ -117,8 +110,7 @@
         <section class="section-card reveal">
             <div class="section-head">
                 <div>
-                    <span class="section-tag">文件列表</span>
-                    <h3>按分类查看</h3>
+                    <h3>文件</h3>
                 </div>
             </div>
 
@@ -131,7 +123,7 @@
                     <div class="archive-head">
                         <div>
                             <h4 th:text="${category.categoryName}">分类</h4>
-                            <p th:text="${files == null ? '当前还没有文件' : '当前共 ' + files.size() + ' 个文件'}">当前还没有文件</p>
+                            <p th:text="${files == null ? '0 个文件' : files.size() + ' 个文件'}">0 个文件</p>
                         </div>
                         <form th:action="@{'/memo/category/' + ${category.id} + '/delete'}" method="post">
                             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
@@ -140,7 +132,7 @@
                     </div>
 
                     <div class="empty-panel small-empty" th:if="${files == null || files.isEmpty()}">
-                        <p>这个分类下还没有文件。</p>
+                        <p>空。</p>
                     </div>
 
                     <div class="entry-list" th:if="${files != null && !files.isEmpty()}">
@@ -160,7 +152,6 @@
                                         </form>
                                     </div>
                                 </div>
-                                <p th:text="${#strings.isEmpty(file.remark) ? '没有填写备注。' : file.remark}">备注</p>
                             </div>
                         </article>
                     </div>
