@@ -17,6 +17,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -25,7 +26,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.util.UriUtils;
 
+import jakarta.servlet.http.HttpSession;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -40,6 +44,11 @@ public class BusinessController {
     private static final String MOBILE_VIEW_OVERVIEW = "overview";
     private static final String MOBILE_VIEW_RECORDS = "records";
     private static final String MOBILE_VIEW_FILTER = "filter";
+    private static final String DEFAULT_RETURN_TO = "/business";
+    private static final String SESSION_BUSINESS_START_DATE = "business.startDate";
+    private static final String SESSION_BUSINESS_END_DATE = "business.endDate";
+    private static final String SESSION_BUSINESS_SCOPE = "business.scope";
+    private static final String SESSION_BUSINESS_VIEW = "business.view";
 
     @Resource
     private UserService userService;
@@ -60,17 +69,28 @@ public class BusinessController {
     public String index(Authentication authentication,
                         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
                         @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate,
-                        @RequestParam(defaultValue = TYPE_ALL) String scope,
+                        @RequestParam(required = false) String scope,
                         @RequestParam(defaultValue = "1") long page,
-                        @RequestParam(defaultValue = MOBILE_VIEW_OVERVIEW) String view,
+                        @RequestParam(required = false) String view,
+                        HttpSession session,
                         Model model) {
         User currentUser = userService.getByUsername(authentication.getName());
         BusinessAccount businessAccount = businessAccountService.getOrCreateByUserId(currentUser.getId());
-        DateRange range = normalizeRange(startDate, endDate);
-        String normalizedScope = normalizeScope(scope);
-        String activeMobileView = normalizeMobileView(view);
+        LocalDate resolvedStartDate = startDate != null ? startDate : getSessionLocalDate(session, SESSION_BUSINESS_START_DATE);
+        LocalDate resolvedEndDate = endDate != null ? endDate : getSessionLocalDate(session, SESSION_BUSINESS_END_DATE);
+        String resolvedScope = hasBusinessScope(scope) ? scope : getSessionString(session, SESSION_BUSINESS_SCOPE);
+        String resolvedView = hasBusinessView(view) ? view : getSessionString(session, SESSION_BUSINESS_VIEW);
+
+        DateRange range = normalizeRange(resolvedStartDate, resolvedEndDate);
+        String normalizedScope = normalizeScope(resolvedScope);
+        String activeMobileView = normalizeMobileView(resolvedView);
         IPage<BusinessRecordViewDTO> pageData = businessRecordService.getRecordPage(
                 currentUser.getId(), range.startDate, range.endDate, normalizedScope, page, RECORD_PAGE_SIZE);
+
+        session.setAttribute(SESSION_BUSINESS_START_DATE, range.startDate);
+        session.setAttribute(SESSION_BUSINESS_END_DATE, range.endDate);
+        session.setAttribute(SESSION_BUSINESS_SCOPE, normalizedScope);
+        session.setAttribute(SESSION_BUSINESS_VIEW, activeMobileView);
 
         model.addAttribute("currentUser", currentUser);
         model.addAttribute("businessAccount", businessAccount);
@@ -90,6 +110,7 @@ public class BusinessController {
     @GetMapping("/form")
     public String form(Authentication authentication,
                        @RequestParam(required = false, defaultValue = TYPE_REPORT) String type,
+                       @RequestParam(required = false) String returnTo,
                        Model model) {
         User currentUser = userService.getByUsername(authentication.getName());
         BusinessAccount businessAccount = businessAccountService.getOrCreateByUserId(currentUser.getId());
@@ -117,16 +138,18 @@ public class BusinessController {
         model.addAttribute("formAction", "/business");
         model.addAttribute("formTitle", inboundMode ? "商品入库" : "报单");
         model.addAttribute("formSubtitle", inboundMode
-                ? "这条记录会进入你自己的经营后台。"
-                : "填对方的报码后，记录会进入对方的经营后台。");
+                ? "这条记录会进入你自己的经营页。"
+                : "填目标报码后，记录会进入对方的经营页。");
         model.addAttribute("submitLabel", "保存记录");
         model.addAttribute("boundTargets", boundTargets);
+        model.addAttribute("returnTo", resolveReturnTarget(returnTo));
         return "business/form";
     }
 
     @GetMapping("/{id}/edit")
     public String edit(Authentication authentication,
                        @PathVariable("id") Long id,
+                       @RequestParam(required = false) String returnTo,
                        Model model,
                        RedirectAttributes redirectAttributes) {
         User currentUser = userService.getByUsername(authentication.getName());
@@ -158,15 +181,16 @@ public class BusinessController {
             model.addAttribute("isEdit", true);
             model.addAttribute("formAction", "/business/" + id);
             model.addAttribute("formTitle", "编辑经营记录");
-            model.addAttribute("formSubtitle", "可以修改时间、产品、数量、金额和备注。记录类型和报码默认保持原状态。");
+            model.addAttribute("formSubtitle", "可以修改时间、产品、数量、金额和备注。记录类型和报码保持原状态。");
             model.addAttribute("submitLabel", "保存修改");
             model.addAttribute("recordId", id);
             model.addAttribute("recordTypeLabel", TYPE_INBOUND.equals(record.getRecordType()) ? "商品入库" : "报单");
             model.addAttribute("boundTargets", businessReportTargetService.listOptions(currentUser.getId()));
+            model.addAttribute("returnTo", resolveReturnTarget(returnTo));
             return "business/form";
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-            return "redirect:/business";
+            return "redirect:" + resolveReturnTarget(returnTo);
         }
     }
 
@@ -174,12 +198,13 @@ public class BusinessController {
     public String create(Authentication authentication,
                          @Valid @ModelAttribute("formDTO") BusinessRecordFormDTO formDTO,
                          BindingResult bindingResult,
+                         @RequestParam(required = false) String returnTo,
                          RedirectAttributes redirectAttributes) {
         String normalizedType = normalizeRecordType(formDTO.getRecordType());
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.formDTO", bindingResult);
             redirectAttributes.addFlashAttribute("formDTO", formDTO);
-            return "redirect:/business/form?type=" + normalizedType;
+            return "redirect:/business/form?type=" + normalizedType + buildReturnToParam(returnTo);
         }
 
         User currentUser = userService.getByUsername(authentication.getName());
@@ -192,9 +217,9 @@ public class BusinessController {
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             redirectAttributes.addFlashAttribute("formDTO", formDTO);
-            return "redirect:/business/form?type=" + normalizedType;
+            return "redirect:/business/form?type=" + normalizedType + buildReturnToParam(returnTo);
         }
-        return "redirect:/business";
+        return "redirect:" + resolveReturnTarget(returnTo);
     }
 
     @PostMapping("/{id}")
@@ -202,11 +227,12 @@ public class BusinessController {
                          @PathVariable("id") Long id,
                          @Valid @ModelAttribute("formDTO") BusinessRecordFormDTO formDTO,
                          BindingResult bindingResult,
+                         @RequestParam(required = false) String returnTo,
                          RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.formDTO", bindingResult);
             redirectAttributes.addFlashAttribute("formDTO", formDTO);
-            return "redirect:/business/" + id + "/edit";
+            return "redirect:/business/" + id + "/edit" + buildReturnToQuery(returnTo);
         }
 
         User currentUser = userService.getByUsername(authentication.getName());
@@ -216,9 +242,9 @@ public class BusinessController {
         } catch (IllegalArgumentException ex) {
             redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
             redirectAttributes.addFlashAttribute("formDTO", formDTO);
-            return "redirect:/business/" + id + "/edit";
+            return "redirect:/business/" + id + "/edit" + buildReturnToQuery(returnTo);
         }
-        return "redirect:/business";
+        return "redirect:" + resolveReturnTarget(returnTo);
     }
 
     @PostMapping("/{id}/delete")
@@ -372,6 +398,51 @@ public class BusinessController {
             query.append(hasParam ? "&" : "?").append("view=").append(normalizedView);
         }
         return query.toString();
+    }
+
+    private String resolveReturnTarget(String returnTo) {
+        if (StringUtils.hasText(returnTo)
+                && returnTo.startsWith("/business")
+                && !returnTo.startsWith("//")) {
+            return returnTo;
+        }
+        return DEFAULT_RETURN_TO;
+    }
+
+    private String buildReturnToParam(String returnTo) {
+        String resolvedReturnTo = resolveReturnTarget(returnTo);
+        if (DEFAULT_RETURN_TO.equals(resolvedReturnTo)) {
+            return "";
+        }
+        return "&returnTo=" + UriUtils.encode(resolvedReturnTo, StandardCharsets.UTF_8);
+    }
+
+    private String buildReturnToQuery(String returnTo) {
+        String resolvedReturnTo = resolveReturnTarget(returnTo);
+        if (DEFAULT_RETURN_TO.equals(resolvedReturnTo)) {
+            return "";
+        }
+        return "?returnTo=" + UriUtils.encode(resolvedReturnTo, StandardCharsets.UTF_8);
+    }
+
+    private LocalDate getSessionLocalDate(HttpSession session, String key) {
+        Object value = session.getAttribute(key);
+        return value instanceof LocalDate localDate ? localDate : null;
+    }
+
+    private String getSessionString(HttpSession session, String key) {
+        Object value = session.getAttribute(key);
+        return value instanceof String text ? text : null;
+    }
+
+    private boolean hasBusinessScope(String scope) {
+        return TYPE_REPORT.equalsIgnoreCase(scope) || TYPE_INBOUND.equalsIgnoreCase(scope) || TYPE_ALL.equalsIgnoreCase(scope);
+    }
+
+    private boolean hasBusinessView(String view) {
+        return MOBILE_VIEW_OVERVIEW.equalsIgnoreCase(view)
+                || MOBILE_VIEW_RECORDS.equalsIgnoreCase(view)
+                || MOBILE_VIEW_FILTER.equalsIgnoreCase(view);
     }
 
     private record DateRange(LocalDate startDate, LocalDate endDate) {

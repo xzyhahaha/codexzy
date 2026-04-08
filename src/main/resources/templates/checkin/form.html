@@ -6,21 +6,20 @@
     <title th:text="${formTitle} + ' - codexzy'">新建打卡 - codexzy</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="site-body">
+<body class="site-body checkin-page checkin-form-page">
 <div class="site-shell">
     <header class="site-masthead reveal">
         <div class="brand-block">
             <a class="brand-mark" th:href="@{/}">CZ</a>
             <div class="brand-copy">
-                <span class="section-tag">Check-In Editor</span>
+                <span class="section-tag">打卡编辑</span>
                 <h1 th:text="${formTitle}">新建打卡</h1>
-                <p th:text="${formSubtitle}">支持补卡，默认日期是今天。</p>
+                <p th:text="${isEdit ? '修改这条打卡内容' : '写下一条新的打卡记录'}">写下一条新的打卡记录</p>
             </div>
         </div>
-        <nav class="header-actions">
-            <a class="ghost-btn" th:href="@{/checkin}">返回列表</a>
-            <a class="ghost-btn" th:href="@{/checkin/calendar}">查看月历</a>
-        </nav>
+        <div class="section-tools">
+            <a class="ghost-btn small-btn" th:href="${returnTo}">返回打卡</a>
+        </div>
     </header>
 
     <main class="page-stack">
@@ -28,69 +27,78 @@
             <article class="section-card main-column">
                 <div class="section-head">
                     <div>
-                        <span class="section-tag" th:text="${isEdit} ? 'Edit Mode' : 'Create Mode'">Create Mode</span>
+                        <span class="section-tag" th:text="${isEdit} ? '编辑模式' : '新建模式'">新建模式</span>
                         <h3 th:text="${isEdit} ? '修改已有打卡内容' : '写下一条新的打卡记录'">写下一条新的打卡记录</h3>
                     </div>
-                    <span class="status-pill">默认日期为今天，可手动补卡</span>
+                    <span class="status-pill" th:text="${isEdit ? '编辑中' : '待保存'}">待保存</span>
                 </div>
 
                 <form th:action="${formAction}" th:object="${formDTO}" method="post" class="form-stack">
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                    <input type="hidden" name="returnTo" th:value="${returnTo}">
 
-                    <label>
-                        <span>标题</span>
-                        <input type="text" th:field="*{title}" placeholder="例如：完成接口联调 / 看完两章算法题">
-                        <small class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></small>
-                    </label>
+                    <section class="business-form-block">
+                        <div class="business-form-block__head">
+                            <span class="section-tag">基础信息</span>
+                            <h4>先写标题和日期</h4>
+                        </div>
 
-                    <label>
-                        <span>打卡日期</span>
-                        <input type="date" th:field="*{checkDate}" th:attr="max=${maxDate}">
-                        <small class="field-hint">只能选择今天及以前的日期。</small>
-                        <small class="field-error" th:if="${#fields.hasErrors('checkDate')}" th:errors="*{checkDate}"></small>
-                    </label>
+                        <div class="form-grid">
+                            <label>
+                                <span>标题</span>
+                                <input type="text" th:field="*{title}" placeholder="例如：完成接口联调 / 看完两章算法题">
+                                <small class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></small>
+                            </label>
 
-                    <label>
-                        <span>内容</span>
-                        <textarea th:field="*{content}" rows="9" placeholder="写下今天完成了什么、推进到了哪一步、遇到了什么问题以及怎么处理。"></textarea>
-                        <small class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></small>
-                    </label>
+                            <label>
+                                <span>打卡日期</span>
+                                <input type="date" th:field="*{checkDate}" th:attr="max=${maxDate}">
+                                <small class="field-error" th:if="${#fields.hasErrors('checkDate')}" th:errors="*{checkDate}"></small>
+                            </label>
+                        </div>
+                    </section>
+
+                    <section class="business-form-block">
+                        <div class="business-form-block__head">
+                            <span class="section-tag">内容</span>
+                            <h4>再补充今天做了什么</h4>
+                        </div>
+
+                        <div class="form-grid">
+                            <label class="form-span-2">
+                                <span>内容</span>
+                                <textarea th:field="*{content}" rows="9" placeholder="写下今天完成了什么、推进到了哪一步、遇到了什么问题以及怎么处理。"></textarea>
+                                <small class="field-error" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></small>
+                            </label>
+                        </div>
+                    </section>
 
                     <div class="form-actions-row">
                         <button type="submit" class="solid-btn" th:text="${submitLabel}">保存打卡</button>
-                        <a class="inline-link" th:href="@{/checkin}">返回列表</a>
+                        <a class="inline-link" th:href="${returnTo}">返回打卡</a>
                     </div>
                 </form>
             </article>
 
-            <details class="section-card collapsible-card side-tone sticky-card reveal">
-                <summary>
-                    <div class="collapsible-summary-copy">
-                        <span class="section-tag">Writing Tips</span>
-                        <h3>怎么写会更有回看价值</h3>
-                        <p>标题、内容和补卡原因需要时再展开看，先把写入区留给主流程。</p>
-                    </div>
-                    <span class="summary-hint">展开提示</span>
-                </summary>
-                <div class="collapsible-body">
-                    <div class="bullet-grid">
-                        <article>
-                            <strong>标题写结果</strong>
-                            <p>例如“完成接口联调”比“今天继续开发”更容易在后面快速扫过去。</p>
-                        </article>
-                        <article>
-                            <strong>内容写过程</strong>
-                            <p>把关键进展、阻塞点和决策写清楚，后面翻记录时会省很多时间。</p>
-                        </article>
-                        <article>
-                            <strong>补卡写原因</strong>
-                            <p>如果是补前几天的内容，建议说明当时为什么没有及时记录。</p>
-                        </article>
-                    </div>
+            <aside class="section-card side-tone business-form-side">
+                <div class="business-form-side__stack">
+                    <article class="readonly-card">
+                        <span class="meta-note">当前模式</span>
+                        <strong th:text="${isEdit ? '编辑打卡' : '新建打卡'}">新建打卡</strong>
+                        <p th:text="${isEdit ? '修改后会覆盖这条记录。' : '保存后会出现在列表和月历里。'}">保存后会出现在列表和月历里。</p>
+                    </article>
+
+                    <article class="readonly-card">
+                        <span class="meta-note">返回路径</span>
+                        <strong th:text="${#strings.startsWith(returnTo, '/checkin/day') ? '当天记录' : '打卡列表'}">打卡列表</strong>
+                        <p th:text="${#strings.startsWith(returnTo, '/checkin/day') ? '保存后回到当前日期详情。' : '保存后回到当前打卡列表页。'}">保存后回到当前打卡列表页。</p>
+                        <a class="ghost-btn small-btn" th:href="${returnTo}">直接返回</a>
+                    </article>
                 </div>
-            </details>
+            </aside>
         </section>
     </main>
 </div>
+<div th:replace="~{fragments/mobile-tabbar :: mobileTabbar(activeTab='checkin')}"></div>
 </body>
 </html>

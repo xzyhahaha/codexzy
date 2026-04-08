@@ -6,6 +6,7 @@ import com.codexzy.entity.BusinessRecord;
 import com.codexzy.mapper.BusinessRecordMapper;
 import com.codexzy.service.BusinessAccountService;
 import com.codexzy.service.BusinessReporterNoteService;
+import com.codexzy.service.BusinessReportTargetService;
 import com.codexzy.service.UserService;
 import com.codexzy.util.BusinessRecordStatusUtil;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,6 +38,9 @@ class BusinessRecordServiceImplTest {
 
     @Mock
     private BusinessReporterNoteService businessReporterNoteService;
+
+    @Mock
+    private BusinessReportTargetService businessReportTargetService;
 
     @InjectMocks
     private BusinessRecordServiceImpl businessRecordService;
@@ -76,5 +81,35 @@ class BusinessRecordServiceImplTest {
         assertEquals(1L, record.getReporterUserId());
         assertEquals(BusinessRecordStatusUtil.UNINVENTORIED, record.getRecordStatus());
         assertEquals(BusinessRecordStatusUtil.UNINVENTORIED, recordCaptor.getValue().getRecordStatus());
+        verify(businessReportTargetService).touchTarget(1L, 2L);
+    }
+
+    @Test
+    void createReportRecordShouldBindTargetWhenRequested() {
+        BusinessAccount currentAccount = new BusinessAccount();
+        currentAccount.setUserId(1L);
+        BusinessAccount targetAccount = new BusinessAccount();
+        targetAccount.setUserId(2L);
+
+        when(businessAccountService.getOrCreateByUserId(1L)).thenReturn(currentAccount);
+        when(businessAccountService.getByReportCode("TARGET-001")).thenReturn(targetAccount);
+        when(businessRecordMapper.insert(any(BusinessRecord.class))).thenReturn(1);
+
+        BusinessRecordFormDTO formDTO = new BusinessRecordFormDTO();
+        formDTO.setRecordType("REPORT");
+        formDTO.setTargetReportCode("TARGET-001");
+        formDTO.setBindTarget(Boolean.TRUE);
+        formDTO.setRecordStatus(BusinessRecordStatusUtil.UNINVENTORIED);
+        formDTO.setOccurredAt(LocalDateTime.of(2026, 4, 3, 10, 30));
+        formDTO.setProductName("product");
+        formDTO.setQuantity(3);
+        formDTO.setCostAmount(new BigDecimal("12.30"));
+        formDTO.setFixedReturnAmount(new BigDecimal("1.00"));
+        formDTO.setProfitAmount(new BigDecimal("2.00"));
+        formDTO.setSoldAmount(new BigDecimal("15.30"));
+
+        businessRecordService.createRecord(1L, formDTO);
+
+        verify(businessReportTargetService).bindTarget(1L, 2L);
     }
 }

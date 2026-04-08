@@ -12,145 +12,127 @@
         <div class="brand-block">
             <a class="brand-mark" th:href="@{/}">CZ</a>
             <div class="brand-copy">
-                <span class="section-tag">入口选择</span>
+                <span class="section-tag">开始使用</span>
                 <h1>codexzy</h1>
-                <p th:text="|${todayLabel} · 先选报单还是打卡|">2026年4月2日 星期四</p>
+                <p th:text="|${todayLabel} · 从常用页面开始|">2026年4月2日 星期四</p>
             </div>
         </div>
-        <nav class="header-actions">
-            <a class="ghost-btn" th:href="@{/business}">经营后台</a>
-            <a class="ghost-btn" th:href="@{/checkin}">打卡档案</a>
-            <a class="ghost-btn" th:href="@{/memo}">备忘资料库</a>
-            <a class="ghost-btn" th:href="@{/user/profile}">个人设置</a>
-            <form th:action="@{/logout}" method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button type="submit" class="text-btn">退出登录</button>
-            </form>
-        </nav>
     </header>
 
     <main class="page-stack">
         <section class="hero-banner landing-hero reveal">
             <div class="hero-copy">
-                <span class="section-tag">Daily System</span>
+                <span class="section-tag">今日入口</span>
                 <h2>
                     <span th:text="${#strings.isEmpty(currentUser.nickname) ? currentUser.username : currentUser.nickname}">用户</span>
                     <br>
-                    今天先做报单，还是先做打卡。
+                    先打开常用模块。
                 </h2>
-                <p>报单和打卡分开管理，先从下面两个入口里选一个。经营数据进经营后台，日常记录进打卡档案。</p>
+                <p th:text="${todayLabel}">2026年4月2日 星期四</p>
                 <div class="hero-actions">
-                    <a class="solid-btn" th:href="@{/business}">进入报单 / 经营</a>
+                    <a class="solid-btn" th:href="@{/business}">进入经营</a>
                     <a class="ghost-btn" th:href="@{/checkin}">进入打卡</a>
                 </div>
             </div>
             <div class="hero-panel-grid">
-                <article class="insight-card accent-panel">
-                    <span class="meta-note">个人报码</span>
-                    <div class="code-copy-row">
-                        <strong class="code-value" th:text="${businessAccount.reportCode}">CZ00000000</strong>
-                        <button type="button"
-                                class="ghost-btn small-btn code-copy-btn"
-                                th:attr="data-copy-text=${businessAccount.reportCode},data-copy-label='复制个人报码',data-copied-label='已复制',data-copy-error-label='复制失败'"
-                                aria-label="复制个人报码">复制</button>
-                    </div>
-                    <p>这是你唯一绑定到当前账号的个人报码，给下家报单时直接使用这串报码。</p>
+                <article class="insight-card">
+                    <span class="meta-note">当前账号</span>
+                    <strong th:text="${#strings.isEmpty(currentUser.nickname) ? currentUser.username : currentUser.nickname}">用户</strong>
+                    <p th:text="|用户名：${currentUser.username}|">用户名</p>
                 </article>
                 <article class="insight-card">
-                    <span class="meta-note">今日日期</span>
-                    <strong th:text="${todayLabel}">2026年4月2日 星期四</strong>
-                    <p>如果只是记一条日常，就去打卡；如果要处理经营数据，就去报单。</p>
+                    <span class="meta-note">打卡进度</span>
+                    <strong th:text="${stats.currentMonthCount}">0</strong>
+                    <p>本月打卡</p>
                 </article>
             </div>
         </section>
 
-        <section class="choice-grid reveal">
-            <a class="choice-card business-choice" th:href="@{/business}">
-                <div>
-                    <span class="section-tag">经营模块</span>
-                    <h3>报单 / 商品入库</h3>
-                    <p>给下家报码、记录商品入库，按时间范围、按下家分别查看汇总和明细。</p>
+        <section class="home-module-grid reveal">
+            <a class="home-module-card home-module-card--primary module-tone-business" th:href="@{/business}">
+                <div class="home-module-card__head">
+                    <span class="section-tag">经营</span>
+                    <h3>报单 / 入库</h3>
                 </div>
-                <div class="choice-footer">
-                    <span class="choice-meta">查看报码、汇总、明细</span>
-                    <span class="choice-cta">进入经营后台</span>
+                <div class="home-module-card__tips">
+                    <span>报单</span>
+                    <span>入库</span>
+                    <span>汇总</span>
                 </div>
-            </a>
-            <a class="choice-card checkin-choice" th:href="@{/checkin}">
-                <div>
-                    <span class="section-tag">打卡模块</span>
-                    <h3>补卡 / 编辑 / 月历</h3>
-                    <p>选择日期补卡，随时编辑记录，按月查看每天的内容和详情。</p>
-                </div>
-                <div class="choice-footer">
-                    <span class="choice-meta">日常记录、回顾、月历</span>
-                    <span class="choice-cta">进入打卡档案</span>
+                <div class="home-module-card__footer">
+                    <span class="choice-meta">经营记录</span>
+                    <span class="choice-cta">进入</span>
                 </div>
             </a>
-        </section>
 
-        <section class="content-grid home-aux reveal">
-            <article class="section-card">
-                <div class="section-head">
-                    <div>
-                        <span class="section-tag">最近打卡</span>
-                        <h3>从最新内容回看你的节奏</h3>
-                    </div>
-                    <a class="inline-link" th:href="@{/checkin}">查看全部</a>
+            <a class="home-module-card home-module-card--primary module-tone-checkin" th:href="@{/checkin}">
+                <div class="home-module-card__head">
+                    <span class="section-tag">打卡</span>
+                    <h3>打卡 / 月历</h3>
                 </div>
-
-                <div class="empty-panel" th:if="${recentCheckIns.isEmpty()}">
-                    <h4>还没有任何打卡记录</h4>
-                    <p>先从今天开始写第一条，后面月历和统计会一起补起来。</p>
-                    <a class="solid-btn" th:href="@{/checkin/form}">马上新建</a>
-                </div>
-
-                <div class="entry-list" th:if="${!recentCheckIns.isEmpty()}">
-                    <article class="entry-card compact-card" th:each="item : ${recentCheckIns}">
-                        <div class="entry-stamp">
-                            <span th:text="${#temporals.format(item.checkDate, 'MM-dd')}">04-02</span>
-                            <small th:text="${#temporals.format(item.checkDate, 'E')}">周四</small>
-                        </div>
-                        <div class="entry-body">
-                            <div class="entry-head">
-                                <h4 th:text="${item.title}">标题</h4>
-                                <a class="inline-link" th:href="@{'/checkin/' + ${item.id} + '/edit'}">编辑</a>
-                            </div>
-                            <p th:text="${#strings.isEmpty(item.content) ? '这条记录没有填写详细内容。' : item.content}">内容</p>
-                        </div>
-                    </article>
-                </div>
-            </article>
-
-            <article class="section-card side-tone">
-                <div class="section-head">
-                    <div>
-                        <span class="section-tag">快捷入口</span>
-                        <h3>其他常用功能</h3>
-                    </div>
-                </div>
-                <div class="bullet-grid compact-bullets">
+                <div class="home-module-card__metrics">
                     <article>
-                        <strong>备忘资料库</strong>
-                        <p>拖拽上传、粘贴上传、下载和删除都在同一页完成。</p>
+                        <strong th:text="${stats.totalCheckInDays}">0</strong>
+                        <span>累计天数</span>
                     </article>
                     <article>
-                        <strong>个人设置</strong>
-                        <p>修改昵称、邮箱和密码，保持账号信息干净可用。</p>
+                        <strong th:text="${stats.currentStreakDays}">0</strong>
+                        <span>连续打卡</span>
                     </article>
                     <article>
-                        <strong>经营后台</strong>
-                        <p>如果你先处理商品入库或下家报单，就从这里进入。</p>
+                        <strong th:text="${stats.currentMonthCount}">0</strong>
+                        <span>本月次数</span>
                     </article>
                 </div>
-                <div class="hero-actions" style="margin-top: 20px;">
-                    <a class="ghost-btn" th:href="@{/memo}">打开资料库</a>
-                    <a class="ghost-btn" th:href="@{/user/profile}">打开设置</a>
+                <div class="home-module-card__footer">
+                    <span class="choice-meta">打卡记录</span>
+                    <span class="choice-cta">进入</span>
                 </div>
-            </article>
+            </a>
+
+            <a class="home-module-card home-module-card--secondary module-tone-memo" th:href="@{/memo}">
+                <div class="home-module-card__head">
+                    <span class="section-tag">资料</span>
+                    <h3>资料 / 文件</h3>
+                </div>
+                <div class="home-module-card__metrics light-metrics">
+                    <article>
+                        <strong th:text="${memoCategoryCount}">0</strong>
+                        <span>分类数量</span>
+                    </article>
+                    <article>
+                        <strong th:text="${memoFileCount}">0</strong>
+                        <span>文件数量</span>
+                    </article>
+                    <article>
+                        <strong>2</strong>
+                        <span>上传方式</span>
+                    </article>
+                </div>
+                <div class="home-module-card__footer">
+                    <span class="choice-meta">资料整理</span>
+                    <span class="choice-cta">进入</span>
+                </div>
+            </a>
+
+            <a class="home-module-card home-module-card--secondary module-tone-profile" th:href="@{/user/profile}">
+                <div class="home-module-card__head">
+                    <span class="section-tag">我的</span>
+                    <h3>我的 / 设置</h3>
+                </div>
+                <div class="home-module-card__profile">
+                    <span class="home-module-card__eyebrow">当前账号</span>
+                    <strong th:text="${#strings.isEmpty(currentUser.nickname) ? '未设置昵称' : currentUser.nickname}">未设置昵称</strong>
+                    <p th:text="|用户名：${currentUser.username}|">用户名</p>
+                </div>
+                <div class="home-module-card__footer">
+                    <span class="choice-meta">账号设置</span>
+                    <span class="choice-cta">进入</span>
+                </div>
+            </a>
         </section>
     </main>
 </div>
-<script th:src="@{/js/code-copy.js}"></script>
+<div th:replace="~{fragments/mobile-tabbar :: mobileTabbar(activeTab='home')}"></div>
 </body>
 </html>

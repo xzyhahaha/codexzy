@@ -21,6 +21,8 @@ public class BusinessRecordFormDTO {
     @Size(max = 32, message = "报单码不能超过 32 个字符")
     private String targetReportCode;
 
+    private Boolean bindTarget;
+
     @NotBlank(message = "记录类型不能为空")
     @Pattern(regexp = "REPORT|INBOUND", message = "记录类型不合法")
     private String recordType;

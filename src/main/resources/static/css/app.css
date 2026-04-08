@@ -17,11 +17,11 @@
     --success-text: #1e6d42;
     --error-bg: #fff1ed;
     --error-text: #bb4b37;
-    --shadow: 0 26px 60px rgba(42, 36, 32, 0.14);
-    --shadow-soft: 0 16px 34px rgba(42, 36, 32, 0.1);
-    --radius-xl: 30px 30px 14px 30px;
-    --radius-lg: 24px 24px 12px 24px;
-    --radius-md: 18px 18px 10px 18px;
+    --shadow: 0 20px 44px rgba(42, 36, 32, 0.12);
+    --shadow-soft: 0 12px 24px rgba(42, 36, 32, 0.08);
+    --radius-xl: 26px 26px 12px 26px;
+    --radius-lg: 22px 22px 10px 22px;
+    --radius-md: 16px 16px 8px 16px;
     --container: 1280px;
 }
 
@@ -147,8 +147,8 @@ button {
     justify-content: space-between;
     align-items: center;
     gap: 24px;
-    padding: 24px 28px;
-    margin-bottom: 24px;
+    padding: 22px 24px;
+    margin-bottom: 20px;
     border-radius: var(--radius-xl);
 }
 
@@ -187,7 +187,7 @@ button {
 }
 
 .brand-copy h1 {
-    font-size: clamp(26px, 3vw, 36px);
+    font-size: clamp(25px, 2.8vw, 34px);
     line-height: 1.08;
 }
 
@@ -295,7 +295,7 @@ button {
     align-items: center;
     justify-content: center;
     border-radius: 999px;
-    padding: 13px 20px;
+    padding: 12px 18px;
     cursor: pointer;
 }
 
@@ -332,8 +332,8 @@ button {
 }
 
 .small-btn {
-    padding: 10px 14px;
-    font-size: 13px;
+    padding: 9px 13px;
+    font-size: 12px;
 }
 
 .code-copy-row {
@@ -435,7 +435,7 @@ button {
 }
 
 .hero-copy h2 {
-    font-size: clamp(32px, 4.6vw, 52px);
+    font-size: clamp(30px, 4.2vw, 46px);
     line-height: 1.08;
     letter-spacing: 0.01em;
     max-width: 13ch;
@@ -467,6 +467,13 @@ button {
 .business-hero .hero-copy p {
     max-width: 30rem;
     margin-top: 14px;
+}
+
+.business-hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 16px;
 }
 
 .insight-card {
@@ -522,7 +529,7 @@ button {
 .metric-card,
 .shortcut-card,
 .story-grid article {
-    padding: 24px;
+    padding: 22px;
     border-radius: var(--radius-lg);
 }
 
@@ -531,11 +538,11 @@ button {
     overflow: hidden;
     display: grid;
     align-content: space-between;
-    gap: 18px;
-    min-height: 156px;
+    gap: 16px;
+    min-height: 144px;
     background: linear-gradient(180deg, rgba(255, 251, 246, 0.96), rgba(243, 236, 228, 0.9));
     border: 1px solid rgba(33, 45, 57, 0.08);
-    box-shadow: 0 18px 30px rgba(42, 36, 32, 0.1);
+    box-shadow: 0 14px 24px rgba(42, 36, 32, 0.08);
 }
 
 .metric-card--primary {
@@ -545,6 +552,10 @@ button {
 .metric-card--secondary {
     grid-column: span 6;
     min-height: 132px;
+}
+
+.metric-card--compact {
+    grid-column: span 4;
 }
 
 .metric-card::before {
@@ -628,11 +639,11 @@ button {
 }
 
 .section-card {
-    padding: 30px;
+    padding: 24px;
     border-radius: var(--radius-xl);
     background: linear-gradient(180deg, rgba(255, 251, 247, 0.94), rgba(243, 236, 228, 0.88));
     border: 1px solid rgba(33, 45, 57, 0.08);
-    box-shadow: 0 18px 34px rgba(42, 36, 32, 0.1);
+    box-shadow: 0 14px 28px rgba(42, 36, 32, 0.08);
 }
 
 .side-tone {
@@ -650,11 +661,11 @@ button {
 }
 
 .section-head {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
 .section-head h3 {
-    font-size: clamp(24px, 2.2vw, 30px);
+    font-size: clamp(22px, 2vw, 28px);
     line-height: 1.14;
 }
 
@@ -1296,6 +1307,10 @@ textarea:focus {
     background: rgba(255, 255, 255, 0.68);
 }
 
+.home-aux .main-column {
+    grid-column: 1 / -1;
+}
+
 .choice-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1315,28 +1330,28 @@ textarea:focus {
 .home-module-card {
     position: relative;
     overflow: hidden;
-    min-height: 282px;
-    padding: 26px;
-    border-radius: 32px 32px 16px 32px;
+    min-height: 248px;
+    padding: 22px;
+    border-radius: 28px 28px 14px 28px;
     border: 1px solid rgba(33, 45, 57, 0.08);
-    box-shadow: 0 20px 38px rgba(42, 36, 32, 0.12);
+    box-shadow: 0 16px 30px rgba(42, 36, 32, 0.1);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 18px;
+    gap: 16px;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .home-module-card--primary {
-    min-height: 340px;
-    padding: 30px;
-    gap: 20px;
+    min-height: 292px;
+    padding: 24px;
+    gap: 18px;
 }
 
 .home-module-card--secondary {
-    min-height: 228px;
-    padding: 22px;
-    gap: 14px;
+    min-height: 208px;
+    padding: 20px;
+    gap: 12px;
     align-self: start;
 }
 
@@ -1357,15 +1372,15 @@ textarea:focus {
 }
 
 .home-module-card__head h3 {
-    margin: 14px 0 8px;
+    margin: 12px 0 6px;
     font-family: "Georgia", "Songti SC", serif;
-    font-size: clamp(26px, 2.5vw, 34px);
+    font-size: clamp(24px, 2.3vw, 30px);
     line-height: 1.12;
     max-width: 12ch;
 }
 
 .home-module-card--secondary .home-module-card__head h3 {
-    font-size: clamp(22px, 2vw, 28px);
+    font-size: clamp(20px, 1.8vw, 25px);
     margin: 12px 0 6px;
     max-width: none;
 }
@@ -1386,9 +1401,9 @@ textarea:focus {
 .home-module-card__meta,
 .home-module-card__profile {
     display: grid;
-    gap: 12px;
-    padding: 18px 18px 16px;
-    border-radius: 24px;
+    gap: 10px;
+    padding: 16px 16px 14px;
+    border-radius: 20px;
     backdrop-filter: blur(14px);
 }
 
@@ -1417,7 +1432,7 @@ textarea:focus {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 8px 12px;
+    padding: 7px 11px;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 700;
@@ -1440,8 +1455,8 @@ textarea:focus {
 }
 
 .home-module-card__metrics article {
-    padding: 16px 14px;
-    border-radius: 20px;
+    padding: 14px 12px;
+    border-radius: 16px;
     backdrop-filter: blur(10px);
 }
 
@@ -1452,9 +1467,9 @@ textarea:focus {
 
 .home-module-card__metrics strong {
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     font-family: "Georgia", "Songti SC", serif;
-    font-size: 26px;
+    font-size: 24px;
     line-height: 1;
 }
 
@@ -1473,7 +1488,7 @@ textarea:focus {
     justify-content: space-between;
     align-items: center;
     gap: 14px;
-    padding-top: 14px;
+    padding-top: 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.14);
 }
 
@@ -1795,6 +1810,27 @@ textarea:focus {
     border-color: transparent;
 }
 
+.business-filter-card {
+    display: grid;
+    align-content: start;
+    gap: 12px;
+}
+
+.business-filter-card p {
+    margin: 0;
+}
+
+.business-hero-scope {
+    margin-top: 0;
+    gap: 8px;
+}
+
+.business-hero-scope .scope-chip {
+    padding: 8px 12px;
+    min-width: 0;
+    font-size: 12px;
+}
+
 .code-panel {
     padding: 20px;
     border-radius: var(--radius-md);
@@ -1863,6 +1899,74 @@ textarea:focus {
 
 .business-hero .hero-panel-grid .insight-card strong {
     font-size: clamp(26px, 2.4vw, 34px);
+}
+
+.business-page .site-masthead {
+    padding-block: 22px;
+}
+
+.business-page .brand-copy {
+    gap: 6px;
+}
+
+.business-page .brand-copy p {
+    max-width: 36rem;
+    color: var(--ink-soft);
+}
+
+.business-form-page .site-masthead {
+    align-items: flex-start;
+}
+
+.checkin-page .site-masthead {
+    margin-bottom: 18px;
+}
+
+.checkin-page .brand-copy p {
+    max-width: 32rem;
+}
+
+.checkin-page .section-head {
+    margin-bottom: 18px;
+}
+
+.checkin-page .metric-grid {
+    margin-top: -4px;
+}
+
+.memo-page .site-masthead,
+.profile-page .site-masthead {
+    margin-bottom: 18px;
+}
+
+.memo-page .section-head,
+.profile-page .section-head {
+    margin-bottom: 18px;
+}
+
+.profile-page .content-grid {
+    align-items: stretch;
+}
+
+.profile-page .dark-card {
+    color: #f4efe8;
+}
+
+.checkin-form-page .site-masthead {
+    align-items: flex-start;
+}
+
+.checkin-form-page .section-tools {
+    align-self: center;
+}
+
+.business-form-page .section-tools {
+    align-self: center;
+}
+
+.business-page .hero-panel-grid {
+    grid-template-columns: repeat(2, minmax(220px, 260px));
+    justify-content: end;
 }
 
 .table-scroll {
@@ -2035,6 +2139,32 @@ textarea:focus {
     font-family: "Georgia", "Songti SC", serif;
 }
 
+.business-form-block {
+    display: grid;
+    gap: 16px;
+    padding: 20px 22px;
+    border-radius: 24px;
+    border: 1px solid rgba(33, 45, 57, 0.08);
+    background: rgba(255, 255, 255, 0.56);
+}
+
+.business-form-block + .business-form-block {
+    margin-top: 2px;
+}
+
+.business-form-block__head {
+    display: grid;
+    gap: 8px;
+}
+
+.business-form-block__head h4 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.16;
+    font-family: "Georgia", "Songti SC", serif;
+    color: var(--ink);
+}
+
 .form-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2047,6 +2177,16 @@ textarea:focus {
 
 .business-form textarea {
     min-height: 160px;
+}
+
+.business-form-side {
+    position: sticky;
+    top: 24px;
+}
+
+.business-form-side__stack {
+    display: grid;
+    gap: 16px;
 }
 
 @media (max-width: 1100px) {
@@ -2092,6 +2232,98 @@ textarea:focus {
         display: none !important;
     }
 
+    .login-page .auth-layout,
+    .register-page .auth-layout {
+        min-height: 100dvh;
+        min-height: 100svh;
+        padding: 16px 0 calc(16px + env(safe-area-inset-bottom));
+        align-items: start;
+        align-content: start;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        scroll-padding-top: 16px;
+        scroll-padding-bottom: calc(24px + env(safe-area-inset-bottom));
+    }
+
+    .login-page .auth-story,
+    .register-page .auth-story {
+        display: none;
+    }
+
+    .login-page .auth-panel,
+    .register-page .auth-panel {
+        gap: 0;
+        justify-content: flex-start;
+        align-self: start;
+    }
+
+    .login-page .auth-panel-header,
+    .register-page .auth-panel-header {
+        margin-bottom: 14px;
+    }
+
+    .login-page .auth-panel-header h2,
+    .register-page .auth-panel-header h2 {
+        font-size: 31px;
+    }
+
+    .login-page .auth-panel-header p,
+    .register-page .auth-panel-header p {
+        margin-top: 8px;
+    }
+
+    .login-page .flash-stack,
+    .register-page .flash-stack {
+        gap: 10px;
+        margin-bottom: 12px;
+    }
+
+    .login-page .flash-banner,
+    .register-page .flash-banner {
+        padding: 11px 13px;
+        border-radius: 14px;
+        font-size: 13px;
+    }
+
+    .login-page .form-stack,
+    .register-page .form-stack {
+        gap: 14px;
+    }
+
+    .login-page .form-stack label,
+    .register-page .form-stack label {
+        gap: 7px;
+    }
+
+    .login-page .form-stack span,
+    .register-page .form-stack span {
+        font-size: 13px;
+    }
+
+    .login-page input,
+    .register-page input {
+        padding: 12px 14px;
+        border-radius: 16px;
+    }
+
+    .login-page .checkbox-inline,
+    .register-page .checkbox-inline {
+        gap: 8px;
+        font-size: 13px;
+    }
+
+    .login-page .solid-btn.wide-btn,
+    .register-page .solid-btn.wide-btn {
+        min-height: 46px;
+        padding: 11px 14px;
+    }
+
+    .login-page .form-footer,
+    .register-page .form-footer {
+        margin-top: 16px;
+        font-size: 13px;
+    }
+
     .site-shell,
     .auth-layout {
         width: min(var(--container), calc(100% - 24px));
@@ -2112,7 +2344,7 @@ textarea:focus {
     .auth-story,
     .auth-panel,
     .hero-banner {
-        padding: 22px;
+        padding: 20px;
         border-radius: 26px 26px 14px 26px;
     }
 
@@ -2167,6 +2399,27 @@ textarea:focus {
 
     .brand-copy p {
         line-height: 1.55;
+    }
+
+    .business-page .site-masthead {
+        margin-bottom: 12px;
+    }
+
+    .business-page .brand-copy p {
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .business-form-page .section-tools {
+        align-self: flex-start;
+    }
+
+    .checkin-form-page .section-tools {
+        align-self: flex-start;
+    }
+
+    .business-page .hero-panel-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
 
     .header-actions,
@@ -2325,15 +2578,15 @@ textarea:focus {
 
     .home-module-card {
         min-height: 0;
-        padding: 22px;
-        gap: 18px;
+        padding: 20px;
+        gap: 16px;
     }
 
     .home-module-card--primary,
     .home-module-card--secondary {
         min-height: 0;
-        padding: 22px;
-        gap: 18px;
+        padding: 20px;
+        gap: 16px;
     }
 
     .home-module-card__head h3 {
@@ -2359,6 +2612,10 @@ textarea:focus {
         width: 100%;
     }
 
+    .business-form-side {
+        position: static;
+    }
+
     .hero-actions form,
     .form-actions-row form {
         width: 100%;
@@ -2380,7 +2637,7 @@ textarea:focus {
     .landing-hero .hero-actions {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 10px;
+        gap: 8px;
         width: 100%;
     }
 
@@ -2444,7 +2701,8 @@ textarea:focus {
     }
 
     .metric-card--primary,
-    .metric-card--secondary {
+    .metric-card--secondary,
+    .metric-card--compact {
         grid-column: span 1;
         min-height: 0;
     }
@@ -2525,6 +2783,11 @@ textarea:focus {
         width: 100%;
     }
 
+    .business-hero-links {
+        margin-top: 12px;
+        gap: 12px;
+    }
+
     .business-hero .hero-actions .solid-btn,
     .business-hero .hero-actions .ghost-btn {
         width: 100%;
@@ -2590,6 +2853,38 @@ textarea:focus {
         width: min(var(--container), calc(100% - 16px));
     }
 
+    .login-page .auth-layout,
+    .register-page .auth-layout {
+        min-height: 100dvh;
+        min-height: 100svh;
+        padding: 12px 0 calc(12px + env(safe-area-inset-bottom));
+    }
+
+    .login-page .auth-panel-header h2,
+    .register-page .auth-panel-header h2 {
+        font-size: 28px;
+    }
+
+    .login-page .auth-panel,
+    .register-page .auth-panel {
+        padding: 16px;
+    }
+
+    .login-page .flash-banner,
+    .register-page .flash-banner {
+        padding: 10px 12px;
+    }
+
+    .login-page input,
+    .register-page input {
+        padding: 11px 13px;
+    }
+
+    .login-page .solid-btn.wide-btn,
+    .register-page .solid-btn.wide-btn {
+        min-height: 44px;
+    }
+
     .site-shell {
         padding-bottom: calc(118px + env(safe-area-inset-bottom));
     }
@@ -2601,7 +2896,7 @@ textarea:focus {
     .auth-story,
     .auth-panel,
     .hero-banner {
-        padding: 18px;
+        padding: 16px;
     }
 
     .brand-mark {
@@ -2642,6 +2937,21 @@ textarea:focus {
     .business-hero .hero-actions .solid-btn,
     .business-hero .hero-actions .ghost-btn {
         font-size: 13px;
+    }
+
+    .business-hero-links {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .business-form-block {
+        padding: 18px;
+        gap: 14px;
+    }
+
+    .business-form-block__head h4 {
+        font-size: 20px;
     }
 
     .module-tabbar {

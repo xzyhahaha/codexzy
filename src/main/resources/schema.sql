@@ -122,3 +122,14 @@ CREATE TABLE IF NOT EXISTS `business_reporter_note` (
     UNIQUE KEY `uk_business_reporter_note_owner_reporter` (`owner_user_id`, `reporter_user_id`),
     KEY `idx_business_reporter_note_owner` (`owner_user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `business_report_target` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `user_id` BIGINT NOT NULL,
+    `target_user_id` BIGINT NOT NULL,
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_business_report_target_user_target` (`user_id`, `target_user_id`),
+    KEY `idx_business_report_target_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

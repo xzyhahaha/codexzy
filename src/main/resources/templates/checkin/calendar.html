@@ -6,22 +6,17 @@
     <title>打卡月历 - codexzy</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="site-body">
+<body class="site-body checkin-page">
 <div class="site-shell">
     <header class="site-masthead reveal">
         <div class="brand-block">
             <a class="brand-mark" th:href="@{/}">CZ</a>
             <div class="brand-copy">
-                <span class="section-tag">Calendar View</span>
+                <span class="section-tag">月历</span>
                 <h1>打卡月历</h1>
-                <p th:text="${currentLabel}">2026年4月</p>
+                <p th:text="|${currentLabel} · ${stats.currentMonthCount} 次|">2026年4月 · 0 次</p>
             </div>
         </div>
-        <nav class="header-actions">
-            <a class="ghost-btn" th:href="@{/checkin}">打卡列表</a>
-            <a class="ghost-btn" th:href="@{'/checkin/calendar?year=' + ${prev.year} + '&month=' + ${prev.monthValue}}">上个月</a>
-            <a class="ghost-btn" th:href="@{'/checkin/calendar?year=' + ${next.year} + '&month=' + ${next.monthValue}}">下个月</a>
-        </nav>
     </header>
 
     <main class="page-stack">
@@ -29,10 +24,14 @@
             <article class="section-card main-column">
                 <div class="section-head">
                     <div>
-                        <span class="section-tag">Monthly Grid</span>
-                        <h3>日期上直接显示记录摘要</h3>
+                        <span class="section-tag">月历</span>
+                        <h3>按天查看记录</h3>
                     </div>
-                    <span class="status-pill">点击任意日期可进入当天详情</span>
+                    <div class="section-tools">
+                        <a class="ghost-btn small-btn" th:href="@{/checkin}">打卡列表</a>
+                        <a class="ghost-btn small-btn" th:href="@{'/checkin/calendar?year=' + ${prev.year} + '&month=' + ${prev.monthValue}}">上个月</a>
+                        <a class="ghost-btn small-btn" th:href="@{'/checkin/calendar?year=' + ${next.year} + '&month=' + ${next.monthValue}}">下个月</a>
+                    </div>
                 </div>
 
                 <div class="calendar-week">
@@ -56,46 +55,30 @@
                         </div>
                         <div class="calendar-card-body">
                             <strong th:text="${day.primaryTitle != null && !day.primaryTitle.isEmpty() ? day.primaryTitle : '当天暂无记录'}">当天暂无记录</strong>
-                            <span class="calendar-link-hint" th:text="${day.checkedIn} ? '查看当天记录' : '点击补充当天内容'">查看当天记录</span>
+                            <span class="calendar-link-hint" th:text="${day.checkedIn} ? '查看记录' : '补充记录'">查看记录</span>
                         </div>
                     </a>
                 </div>
             </article>
+        </section>
 
-            <details class="section-card collapsible-card side-tone sticky-card reveal">
-                <summary>
-                    <div class="collapsible-summary-copy">
-                        <span class="section-tag">Legend</span>
-                        <h3>怎么看这张月历</h3>
-                        <p>颜色含义和打卡统计都在这里，需要时再展开查看。</p>
-                    </div>
-                    <span class="summary-hint">展开说明</span>
-                </summary>
-                <div class="collapsible-body">
-                    <div class="legend-list">
-                        <div class="legend-item"><span class="legend-swatch active"></span><p>高亮日期表示当天存在打卡记录。</p></div>
-                        <div class="legend-item"><span class="legend-swatch today"></span><p>描边日期表示今天。</p></div>
-                        <div class="legend-item"><span class="legend-swatch muted"></span><p>浅色日期是补齐月历结构的前后月份。</p></div>
-                    </div>
-                    <div class="bullet-grid">
-                        <article>
-                            <strong th:text="${stats.totalCheckInDays}">0</strong>
-                            <p>累计打卡天数</p>
-                        </article>
-                        <article>
-                            <strong th:text="${stats.currentStreakDays}">0</strong>
-                            <p>当前连续打卡</p>
-                        </article>
-                        <article>
-                            <strong th:text="${stats.currentMonthCount}">0</strong>
-                            <p>本月打卡次数</p>
-                        </article>
-                    </div>
-                </div>
-            </details>
+        <section class="metric-grid reveal">
+            <article class="metric-card metric-card--compact">
+                <span class="meta-note">累计</span>
+                <strong class="metric-number" th:text="${stats.totalCheckInDays}">0</strong>
+            </article>
+            <article class="metric-card metric-card--compact tone-warm">
+                <span class="meta-note">连续</span>
+                <strong class="metric-number" th:text="${stats.currentStreakDays}">0</strong>
+            </article>
+            <article class="metric-card metric-card--compact tone-soft">
+                <span class="meta-note">本月</span>
+                <strong class="metric-number" th:text="${stats.currentMonthCount}">0</strong>
+            </article>
         </section>
     </main>
 </div>
+<div th:replace="~{fragments/mobile-tabbar :: mobileTabbar(activeTab='checkin')}"></div>
 </body>
 </html>
 

@@ -3,24 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>备忘资料库 - codexzy</title>
+    <title>资料页 - codexzy</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="site-body">
+<body class="site-body memo-page">
 <div class="site-shell">
     <header class="site-masthead reveal">
         <div class="brand-block">
             <a class="brand-mark" th:href="@{/}">CZ</a>
             <div class="brand-copy">
-                <span class="section-tag">Memo Library</span>
-                <h1>备忘资料库</h1>
-                <p th:text="|当前有 ${categoryCount} 个分类，已归档 ${fileCount} 个文件|">当前有 0 个分类，已归档 0 个文件</p>
+                <span class="section-tag">资料页</span>
+                <h1>资料和文件</h1>
+                <p th:text="|${categoryCount} 个分类 · ${fileCount} 个文件|">0 个分类 · 0 个文件</p>
             </div>
         </div>
-        <nav class="header-actions">
-            <a class="ghost-btn" th:href="@{/}">返回首页</a>
-            <a class="ghost-btn" th:href="@{/checkin}">打卡档案</a>
-        </nav>
     </header>
 
     <main class="page-stack">
@@ -33,19 +29,19 @@
             <article class="section-card main-column">
                 <div class="section-head">
                     <div>
-                        <span class="section-tag">Upload Studio</span>
-                        <h3>文件拖进来，或者直接粘贴上传</h3>
+                        <span class="section-tag">上传</span>
+                        <h3>拖拽、点击或粘贴上传</h3>
                     </div>
                     <div class="badge-row">
-                        <span class="status-pill">拖拽上传</span>
-                        <span class="status-pill">粘贴上传</span>
-                        <span class="status-pill">点击选择</span>
+                        <span class="status-pill">拖拽</span>
+                        <span class="status-pill">粘贴</span>
+                        <span class="status-pill">选择</span>
                     </div>
                 </div>
 
                 <div class="empty-panel" th:if="${categories.isEmpty()}">
                     <h4>还没有可用分类</h4>
-                    <p>先在右侧创建分类，再开始上传资料。</p>
+                    <p>先建一个分类。</p>
                 </div>
 
                 <form th:if="${!categories.isEmpty()}" th:action="@{/memo/upload}" th:object="${uploadForm}" method="post" enctype="multipart/form-data" class="form-stack">
@@ -66,7 +62,7 @@
                             <div class="upload-glyph">+</div>
                             <div class="upload-copy">
                                 <h4>把文件拖到这里</h4>
-                                <p>也可以点击此区域选择文件，或者在页面里直接按 <strong>Ctrl + V</strong> / <strong>Command + V</strong> 粘贴文件。</p>
+                                <p>也可以点击选择，或直接粘贴上传。</p>
                             </div>
                             <div class="upload-meta" id="memoFileMeta">当前还没有选择文件</div>
                         </div>
@@ -81,7 +77,6 @@
 
                     <div class="form-actions-row">
                         <button type="submit" class="solid-btn">上传文件</button>
-                        <span class="field-hint">上传后会直接归档到对应分类。</span>
                     </div>
                 </form>
             </article>
@@ -89,8 +84,8 @@
             <aside class="section-card sticky-card side-tone">
                 <div class="section-head">
                     <div>
-                        <span class="section-tag">Category Studio</span>
-                        <h3>先把资料结构搭起来</h3>
+                        <span class="section-tag">分类</span>
+                        <h3>先创建分类</h3>
                     </div>
                 </div>
 
@@ -109,11 +104,11 @@
                 <div class="bullet-grid compact-bullets">
                     <article>
                         <strong th:text="${categoryCount}">0</strong>
-                        <p>分类数量</p>
+                        <p>分类</p>
                     </article>
                     <article>
                         <strong th:text="${fileCount}">0</strong>
-                        <p>文件数量</p>
+                        <p>文件</p>
                     </article>
                 </div>
             </aside>
@@ -122,14 +117,13 @@
         <section class="section-card reveal">
             <div class="section-head">
                 <div>
-                    <span class="section-tag">Archive</span>
-                    <h3>按分类查看所有归档文件</h3>
+                    <span class="section-tag">文件列表</span>
+                    <h3>按分类查看</h3>
                 </div>
             </div>
 
             <div class="empty-panel" th:if="${categories.isEmpty()}">
                 <h4>还没有分类</h4>
-                <p>创建一个分类后，这里会显示对应的文件归档列表。</p>
             </div>
 
             <div class="archive-stack" th:each="category : ${categories}" th:with="files=${groupedFiles[category.id]}">
@@ -175,6 +169,7 @@
         </section>
     </main>
 </div>
+<div th:replace="~{fragments/mobile-tabbar :: mobileTabbar(activeTab='memo')}"></div>
 <script th:src="@{/js/memo-upload.js}"></script>
 </body>
 </html>

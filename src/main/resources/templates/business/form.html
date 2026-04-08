@@ -6,7 +6,7 @@
     <title>经营录入 - codexzy</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
-<body class="site-body">
+<body class="site-body business-form-page">
 <div class="site-shell">
     <header class="site-masthead reveal">
         <div class="brand-block">
@@ -14,24 +14,12 @@
             <div class="brand-copy">
                 <span class="section-tag">经营录入</span>
                 <h1 th:text="${isInbound ? '商品入库' : '报单'}">经营录入</h1>
-                <p class="code-copy-row compact">
-                    <span class="code-copy-label">个人报码：</span>
-                    <strong class="code-inline-value" th:text="${businessAccount.reportCode}">CZ00000000</strong>
-                    <button type="button"
-                            class="ghost-btn small-btn code-copy-btn"
-                            th:attr="data-copy-text=${businessAccount.reportCode},data-copy-label='复制个人报码',data-copied-label='已复制',data-copy-error-label='复制失败'"
-                            aria-label="复制个人报码">复制</button>
-                </p>
+                <p th:text="${isInbound ? '记录自己的入库数据' : '记录一条新的报单'}">记录一条经营数据</p>
             </div>
         </div>
-        <nav class="header-actions">
-            <a class="ghost-btn" th:href="@{/business}">返回经营后台</a>
-            <a class="ghost-btn" th:href="@{/}">返回首页</a>
-            <form th:action="@{/logout}" method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                <button type="submit" class="text-btn">退出登录</button>
-            </form>
-        </nav>
+        <div class="section-tools">
+            <a class="ghost-btn small-btn" th:href="${returnTo}">返回经营</a>
+        </div>
     </header>
 
     <main class="content-grid reveal">
@@ -40,20 +28,27 @@
             <div class="flash-banner error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
         </div>
 
-        <section class="section-card">
+        <section class="section-card main-column">
             <div class="section-head">
                 <div>
-                    <span class="section-tag">录入表单</span>
+                    <span class="section-tag">当前操作</span>
                     <h3 th:text="${formTitle}">填写经营记录</h3>
-                    <p class="field-hint" th:text="${formSubtitle}">经营说明</p>
                 </div>
+                <span class="status-pill" th:text="${isEdit ? '编辑中' : (isInbound ? '入库模式' : '报单模式')}">报单模式</span>
             </div>
 
             <form class="form-stack business-form" th:action="@{${formAction}}" method="post" th:object="${formDTO}"
                   th:attr="data-own-code=${businessAccount.reportCode},data-edit-mode=${isEdit}">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                <input type="hidden" name="returnTo" th:value="${returnTo}">
 
-                <div class="form-grid">
+                <section class="business-form-block">
+                    <div class="business-form-block__head">
+                        <span class="section-tag">归属</span>
+                        <h4>先确定记录类型和对象</h4>
+                    </div>
+
+                    <div class="form-grid">
                     <label class="form-span-2">
                         <span>记录类型</span>
                         <div th:if="${!isEdit}">
@@ -61,12 +56,10 @@
                                 <option value="REPORT">报单</option>
                                 <option value="INBOUND">商品入库</option>
                             </select>
-                            <small class="field-hint">报单会进入对方后台，入库会进入你自己的后台。</small>
                             <div class="field-error" th:if="${#fields.hasErrors('recordType')}" th:errors="*{recordType}">类型错误</div>
                         </div>
                         <div th:if="${isEdit}" class="readonly-card">
                             <strong th:text="${recordTypeLabel}">报单</strong>
-                            <p class="field-hint">编辑时记录类型保持原状态，不会改变所属后台。</p>
                             <input type="hidden" th:field="*{recordType}">
                         </div>
                     </label>
@@ -78,17 +71,45 @@
                             <option value="INVENTORIED_PENDING_SETTLEMENT">已入库待结算</option>
                             <option value="SETTLED">已结算</option>
                         </select>
-                        <small class="field-hint" th:text="${isInbound ? '这个状态会同步出现在后台列表和报单详情页。' : '报单单据提交后，状态只能由上家修改。'}">这个状态会同步出现在后台列表和报单详情页。</small>
                         <div class="field-error" th:if="${#fields.hasErrors('recordStatus')}" th:errors="*{recordStatus}">状态错误</div>
                     </label>
 
-                    <label>
+                    <label class="form-span-2" th:if="${!isInbound && !isEdit}">
+                        <span>已绑定账号</span>
+                        <select data-bound-target-select th:disabled="${#lists.isEmpty(boundTargets)}">
+                            <option value="">手动输入或选择已绑定账号</option>
+                            <option th:each="item : ${boundTargets}"
+                                    th:value="${item.targetReportCode}"
+                                    th:selected="${item.targetReportCode == formDTO.targetReportCode}"
+                                    th:text="|${item.targetDisplayName} · ${item.targetReportCode}|">张三 · CZ00000000</option>
+                        </select>
+                        <small class="field-hint"
+                               th:text="${#lists.isEmpty(boundTargets) ? '当前还没有已绑定账号。' : '选择后会自动填入目标报码。'}">
+                            当前还没有已绑定账号。
+                        </small>
+                    </label>
+
+                    <label class="form-span-2">
                         <span>目标报单码</span>
                         <input type="text" th:field="*{targetReportCode}" th:readonly="${isInbound || isEdit}" placeholder="输入对方的报单码">
-                        <small class="field-hint" th:text="${isEdit ? '编辑时目标报码保持不变。' : (isInbound ? '入库模式会自动归到你自己的个人报码下。' : '把对方的报码填在这里，提交后会进入对方后台。')}">提示</small>
+                        <small class="field-hint" th:text="${isEdit ? '编辑时目标报码保持不变。' : (isInbound ? '入库模式会自动归到你自己名下。' : '可手动输入。')}">提示</small>
                         <div class="field-error" th:if="${#fields.hasErrors('targetReportCode')}" th:errors="*{targetReportCode}">报码错误</div>
                     </label>
 
+                    <label class="checkbox-inline form-span-2" th:if="${!isInbound && !isEdit}">
+                        <input type="checkbox" th:field="*{bindTarget}">
+                        <span>把这次目标保存为常用账号，下次报单时可直接选择</span>
+                    </label>
+                    </div>
+                </section>
+
+                <section class="business-form-block">
+                    <div class="business-form-block__head">
+                        <span class="section-tag">基础信息</span>
+                        <h4>再填写时间、产品和数量</h4>
+                    </div>
+
+                    <div class="form-grid">
                     <label>
                         <span>发生时间</span>
                         <input type="datetime-local" th:field="*{occurredAt}">
@@ -106,7 +127,16 @@
                         <input type="number" th:field="*{quantity}" min="1" step="1" placeholder="0">
                         <div class="field-error" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}">数量错误</div>
                     </label>
+                    </div>
+                </section>
 
+                <section class="business-form-block">
+                    <div class="business-form-block__head">
+                        <span class="section-tag">金额信息</span>
+                        <h4>补齐成本、固返、利润和卖出</h4>
+                    </div>
+
+                    <div class="form-grid">
                     <label>
                         <span>成本</span>
                         <input type="number" th:field="*{costAmount}" min="0" step="0.01" placeholder="0.00">
@@ -130,54 +160,50 @@
                         <input type="number" th:field="*{soldAmount}" min="0" step="0.01" placeholder="0.00">
                         <div class="field-error" th:if="${#fields.hasErrors('soldAmount')}" th:errors="*{soldAmount}">卖出金额错误</div>
                     </label>
+                    </div>
+                </section>
 
+                <section class="business-form-block">
+                    <div class="business-form-block__head">
+                        <span class="section-tag">备注</span>
+                        <h4>最后补充客户信息或说明</h4>
+                    </div>
+
+                    <div class="form-grid">
                     <label class="form-span-2">
                         <span>备注</span>
                         <textarea th:field="*{remark}" placeholder="补充一些经营说明、客户信息或额外备注"></textarea>
                         <div class="field-error" th:if="${#fields.hasErrors('remark')}" th:errors="*{remark}">备注错误</div>
                     </label>
-                </div>
+                    </div>
+                </section>
 
                 <div class="form-actions-row">
                     <button type="submit" class="solid-btn" th:text="${submitLabel}">保存记录</button>
-                    <a class="ghost-btn" th:href="@{/business}">取消返回</a>
+                    <a class="ghost-btn" th:href="${returnTo}">返回经营</a>
                 </div>
             </form>
         </section>
 
-        <details class="section-card collapsible-card side-tone sticky-card reveal">
-            <summary>
-                <div class="collapsible-summary-copy">
-                    <span class="section-tag">填写提示</span>
-                    <h3>这页只负责经营记录，不影响打卡</h3>
-                    <p>个人报码已经在顶部给出，具体模式和汇总口径需要时再展开。</p>
-                </div>
-                <span class="summary-hint">展开提示</span>
-            </summary>
-            <div class="collapsible-body">
-                <div class="bullet-grid compact-bullets light-grid">
-                    <article>
-                        <strong>报单模式</strong>
-                        <p>把“记录类型”选成报单，再填对方报码。</p>
-                    </article>
-                    <article>
-                        <strong>入库模式</strong>
-                        <p>把“记录类型”选成入库，系统会默认归到你自己的后台。</p>
-                    </article>
-                    <article>
-                        <strong>数据范围</strong>
-                        <p>时间、成本、固返、利润、卖出和数量都会在后台汇总。</p>
-                    </article>
-                </div>
+        <aside class="section-card side-tone business-form-side">
+            <div class="business-form-side__stack">
+                <article class="readonly-card">
+                    <span class="meta-note">当前模式</span>
+                    <strong th:text="${isEdit ? recordTypeLabel : (isInbound ? '商品入库' : '报单')}">报单</strong>
+                    <p th:text="${isEdit ? '当前在编辑已有记录。' : (isInbound ? '默认归到自己名下。' : '默认记录到目标报码名下。')}">当前模式说明</p>
+                </article>
 
-                <div class="note-panel">
-                    <p>如果你后面要加库存扣减、对账、结算或导出，我可以继续接着做，不用重写现有数据结构。</p>
-                </div>
+                <article class="readonly-card">
+                    <span class="meta-note">返回路径</span>
+                    <strong th:text="${#strings.startsWith(returnTo, '/business/reporters/') ? '报单详情' : '经营页面'}">经营页面</strong>
+                    <p th:text="${#strings.startsWith(returnTo, '/business/reporters/') ? '保存后回到当前报单人的记录页。' : '保存后回到当前经营页。'}">保存后回到当前经营页。</p>
+                </article>
             </div>
-        </details>
+        </aside>
+
     </main>
 </div>
+<div th:replace="~{fragments/mobile-tabbar :: mobileTabbar(activeTab='business')}"></div>
 <script th:src="@{/js/business-form.js}"></script>
-<script th:src="@{/js/code-copy.js}"></script>
 </body>
 </html>
